@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071621"/>
+      <stop offset="0.58" stop-color="#12374a"/>
+      <stop offset="1" stop-color="#168575"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="75%" cy="20%" r="70%">
+      <stop offset="0" stop-color="#7de0cf" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7de0cf" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="72" y="72" width="1056" height="486" rx="34" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.22"/>
+  <circle cx="132" cy="132" r="34" fill="#24b49f"/>
+  <text x="132" y="144" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800" fill="#ffffff">N</text>
+  <text x="190" y="124" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="800" fill="#ffffff">NorthStar</text>
+  <text x="190" y="154" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#9fe5d8">DISTRIBUTION INTELLIGENCE</text>
+  <text x="96" y="266" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="850" fill="#ffffff">Synthetic ERP to</text>
+  <text x="96" y="330" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="850" fill="#ffffff">Executive BI Dashboard</text>
+  <text x="96" y="386" font-family="Inter, Arial, sans-serif" font-size="23" fill="#d6e8ee">Automated refresh · star schema · quality controls · GitHub Pages</text>
+  <g transform="translate(96 445)">
+    <rect width="210" height="72" rx="18" fill="#ffffff" fill-opacity="0.13"/>
+    <text x="24" y="30" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" fill="#9fe5d8">REVENUE</text>
+    <text x="24" y="56" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="850" fill="#ffffff">$27.97M</text>
+    <rect x="232" width="210" height="72" rx="18" fill="#ffffff" fill-opacity="0.13"/>
+    <text x="256" y="30" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" fill="#9fe5d8">MARGIN</text>
+    <text x="256" y="56" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="850" fill="#ffffff">37.0%</text>
+    <rect x="464" width="250" height="72" rx="18" fill="#ffffff" fill-opacity="0.13"/>
+    <text x="488" y="30" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800" fill="#9fe5d8">QUALITY CONTROLS</text>
+    <text x="488" y="56" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="850" fill="#ffffff">20 reviewed</text>
+  </g>
+  <path d="M820 452 C875 390 915 420 962 350 S1042 245 1094 212" fill="none" stroke="#f0bf5a" stroke-width="10" stroke-linecap="round"/>
+  <path d="M820 486 C880 442 928 468 980 415 S1050 346 1102 330" fill="none" stroke="#75d8ca" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+</svg>
