@@ -15,7 +15,7 @@ An end-to-end synthetic ERP analytics portfolio project for a fictional wholesal
 
 This project shows how raw distribution records can become trusted executive analytics. A synthetic ERP generator creates orders, invoices, inventory movements, vendors, purchase orders, customers, products, and returns. The pipeline cleans the data, models it into SQL-friendly facts and dimensions, calculates KPI marts, validates data quality, reconciles controls, exports dashboard-ready JSON, and publishes a live GitHub Pages dashboard.
 
-The result is a recruiter-friendly BI engineering demo that covers business analysis, data modeling, pipeline automation, dashboard UX, data quality, and operational storytelling in one hosted project.
+The result is a public BI engineering demo that covers business analysis, data modeling, pipeline automation, dashboard UX, data quality, and operational storytelling in one hosted project.
 
 ## Business questions answered
 
