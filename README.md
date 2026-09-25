@@ -4,6 +4,27 @@ An end-to-end synthetic ERP analytics portfolio project for a fictional wholesal
 
 > **Portfolio Project — All data shown in this application is synthetically generated and does not represent any real company, customer, vendor, or transaction.**
 
+## Live project
+
+- **Dashboard:** https://jithendra-data.github.io/northstar-distribution-intelligence/
+- **Refresh workflow:** https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml
+- **Case study:** [case-study/case_study.md](case-study/case_study.md)
+- **Architecture guide:** [documentation/architecture/architecture.md](documentation/architecture/architecture.md)
+
+## Portfolio summary
+
+This project shows how raw distribution records can become trusted executive analytics. A synthetic ERP generator creates orders, invoices, inventory movements, vendors, purchase orders, customers, products, and returns. The pipeline cleans the data, models it into SQL-friendly facts and dimensions, calculates KPI marts, validates data quality, reconciles controls, exports dashboard-ready JSON, and publishes a live GitHub Pages dashboard.
+
+The result is a recruiter-friendly BI engineering demo that covers business analysis, data modeling, pipeline automation, dashboard UX, data quality, and operational storytelling in one hosted project.
+
+## Business questions answered
+
+- Where are revenue and gross margin improving or slipping?
+- Which products, regions, and customers drive commercial performance?
+- Which inventory positions create stockout or working capital risk?
+- Which vendors and warehouses affect service reliability?
+- Which customer segments show inactivity or retention risk?
+
 ## Architecture
 ```text
 Synthetic ERP → Raw CSV → Staging SQL → Star schema → Analytics marts
@@ -13,7 +34,7 @@ Synthetic ERP → Raw CSV → Staging SQL → Star schema → Analytics marts
 ```
 
 ## Technology
-Python, pandas, NumPy, Faker, SQL Server-compatible T-SQL, HTML5, CSS3, JavaScript, Apache ECharts.
+Python, pandas, NumPy, Faker, SQL Server-compatible T-SQL, analytics marts, data quality checks, GitHub Actions, GitHub Pages, HTML5, CSS3, JavaScript, Apache ECharts.
 
 ## Generate data
 ```bash

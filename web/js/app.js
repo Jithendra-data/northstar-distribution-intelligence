@@ -68,7 +68,7 @@ function finishLoading(){
  document.body.classList.remove('is-loading');
  if(prefersReducedMotion){document.body.classList.remove('reveal-ready');return}
  requestAnimationFrame(()=>{
-  const targets='.kpi,.panel,.finding-grid,.explore,.placeholder-section';
+  const targets='.portfolio-story,.kpi,.panel,.finding-grid,.explore,.placeholder-section';
   if(window.gsap){
    gsap.to(targets,{opacity:1,y:0,duration:.58,ease:'power3.out',stagger:.035,onComplete:()=>document.body.classList.remove('reveal-ready')});
   }else{
@@ -122,3 +122,4 @@ function drawCharts(rows){
  if(!window.__northstarResizeBound){window.addEventListener('resize',()=>{echarts.getInstanceByDom(document.querySelector('#trend'))?.resize();echarts.getInstanceByDom(document.querySelector('#margin-chart'))?.resize()});window.__northstarResizeBound=true}
 }
 loadDashboard();
+

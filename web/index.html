@@ -3,13 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="NorthStar Distribution executive intelligence dashboard with automated synthetic analytics refreshes.">
+    <meta name="description" content="Portfolio-ready distribution analytics platform with automated synthetic data refreshes, data quality checks, star schema modeling, and an executive BI dashboard.">
     <meta name="theme-color" content="#071621">
+    <meta property="og:title" content="NorthStar Distribution Intelligence Platform">
+    <meta property="og:description" content="End-to-end analytics engineering portfolio project with synthetic ERP data, automated validation, analytics marts, and a hosted BI dashboard.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jithendra-data.github.io/northstar-distribution-intelligence/">
+    <meta name="twitter:card" content="summary_large_image">
     <title>NorthStar | Distribution Intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=ui-20260924-2">
+    <link rel="stylesheet" href="css/styles.css?v=portfolio-20260924-1">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   </head>
   <body class="is-loading">
@@ -39,6 +44,7 @@
         <div class="nav-label">WORKSPACE</div>
         <nav>
           <a class="active" href="#overview"><i>◫</i>Executive overview</a>
+          <a href="#project-story"><i>✦</i>Project story</a>
           <a href="#sales"><i>↗</i>Sales &amp; margin</a>
           <a href="#customers"><i>◎</i>Customers</a>
           <a href="#inventory"><i>▦</i>Inventory</a>
@@ -81,6 +87,11 @@
                 </div>
               </div>
               <div class="notice">Portfolio Project - All data shown in this application is synthetically generated and does not represent any real company, customer, vendor, or transaction.</div>
+              <div class="hero-actions" aria-label="Portfolio project links">
+                <a class="primary-action" href="https://github.com/Jithendra-data/northstar-distribution-intelligence" target="_blank" rel="noreferrer">View GitHub repo</a>
+                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml" target="_blank" rel="noreferrer">Run refresh workflow</a>
+                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Read case study</a>
+              </div>
             </div>
             <div class="hero-status" aria-label="Pipeline status">
               <span>PIPELINE</span>
@@ -88,6 +99,59 @@
               <small>Generate, validate, reconcile, deploy</small>
             </div>
           </div>
+          <section class="portfolio-story" id="project-story" aria-labelledby="project-story-title">
+            <div class="story-intro">
+              <span class="eyebrow">LINKEDIN PORTFOLIO BRIEF</span>
+              <h2 id="project-story-title">A complete analytics engineering project, from synthetic ERP data to executive decisions.</h2>
+              <p>This project demonstrates how a distribution business can turn operational records into trusted KPIs, risk signals, and self-service analysis. The data is fictional, but the architecture mirrors a real BI delivery workflow: generate source records, clean and model them, validate quality, export dashboard-ready JSON, and publish a live executive experience.</p>
+            </div>
+            <div class="story-proof">
+              <article><b>Automated</b><span>GitHub Actions refreshes the synthetic scenario and redeploys the dashboard.</span></article>
+              <article><b>Modeled</b><span>Raw records are shaped into dimensions, facts, KPIs, and analytics marts.</span></article>
+              <article><b>Validated</b><span>Quality checks reconcile duplicates, orphan records, invalid dates, and inventory exceptions.</span></article>
+            </div>
+            <div class="portfolio-grid">
+              <article class="portfolio-card tech-card">
+                <span>TECH STACK</span>
+                <h3>Tools shown in this build</h3>
+                <div class="tech-pills">
+                  <b>Python</b><b>SQL</b><b>Star schema</b><b>Analytics marts</b><b>Data quality</b><b>GitHub Actions</b><b>ECharts</b><b>GitHub Pages</b>
+                </div>
+              </article>
+              <article class="portfolio-card impact-card">
+                <span>BUSINESS IMPACT</span>
+                <h3>Questions the dashboard answers</h3>
+                <ul>
+                  <li>Where are revenue and margin improving or slipping?</li>
+                  <li>Which inventory positions create working capital risk?</li>
+                  <li>Which vendors and warehouses are affecting service?</li>
+                  <li>Which customers show retention or inactivity risk?</li>
+                </ul>
+              </article>
+            </div>
+            <article class="pipeline-card">
+              <div>
+                <span>DATA FLOW</span>
+                <h3>How the data moves through the project</h3>
+              </div>
+              <div class="portfolio-flow" aria-label="Data flow from source generation to dashboard">
+                <b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Validation</b><i>→</i><b>dashboard.json</b><i>→</i><b>Hosted dashboard</b>
+              </div>
+            </article>
+            <article class="refresh-card">
+              <div>
+                <span>REFRESH PIPELINE</span>
+                <h3>What happens when new data is generated</h3>
+              </div>
+              <ol>
+                <li><b>Generate</b><small>Create a new synthetic distribution scenario.</small></li>
+                <li><b>Transform</b><small>Clean raw files and rebuild marts/KPIs.</small></li>
+                <li><b>Validate</b><small>Run quality checks and reconciliation rules.</small></li>
+                <li><b>Publish</b><small>Export dashboard JSON and deploy to GitHub Pages.</small></li>
+              </ol>
+            </article>
+          </section>
+
           <div class="kpi-grid">
             <article class="kpi"><div class="kpi-label">INVOICED REVENUE <span>↗</span></div><strong id="revenue">—</strong><small>Net posted invoice revenue</small></article>
             <article class="kpi"><div class="kpi-label">GROSS PROFIT <span>◈</span></div><strong id="profit">—</strong><small><b id="margin">—</b> gross margin</small></article>
@@ -117,7 +181,9 @@
       </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-    <script src="js/app.js?v=ui-20260924-2"></script>
+    <script src="js/app.js?v=portfolio-20260924-1"></script>
   </body>
 </html>
+
+
 
