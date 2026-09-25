@@ -1,18 +1,24 @@
 const money = value => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',notation:value>=1e6?'compact':'standard',maximumFractionDigits:1}).format(value||0);
 const integer = value => new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value||0);
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.body.classList.add('reveal-ready');
 async function loadDashboard(){
   try{
-    const response=await fetch('data/dashboard.json'); if(!response.ok) throw new Error('Dashboard export is not available yet.');
+    const cacheKey=location.search||`?v=${Date.now()}`;
+    const response=await fetch(`data/dashboard.json${cacheKey}`); if(!response.ok) throw new Error('Dashboard export is not available yet.');
     const data=await response.json(),k=data.executive_kpis||{};
     const run=data.pipeline_metadata||{};
     const banner=document.querySelector('.notice');
     if(banner&&run.refreshed_at_utc){const refreshed=new Date(run.refreshed_at_utc).toLocaleString();banner.textContent=`Synthetic scenario · seed ${run.random_seed} · refreshed ${refreshed}. Figures are fictional and intended for analytics demonstration.`}
+    document.querySelector('.hero-status small').textContent=run.random_seed?`Seed ${run.random_seed} · refreshed by GitHub Actions`:'Generate, validate, reconcile, deploy';
     document.querySelector('#customers-kpi').textContent=integer(k.customers); document.querySelector('#inventory-kpi').textContent=money(k.inventory_value); document.querySelector('#po-value').textContent=money(k.open_po_value);
     setupFilters(data,k);
     renderFindings(data.business_findings||{});
     renderQuality(data.data_quality||{});
     renderTables(data);
-  }catch(error){document.querySelector('#revenue').textContent='Run export'; console.info(error.message)}
+    hydrateShell();
+    finishLoading();
+  }catch(error){document.querySelector('#revenue').textContent='Run export'; console.info(error.message); finishLoading()}
 }
 function setupFilters(data,k){
   const rows=data.sales_trend_by_region||[],months=[...new Set(rows.map(r=>r.YearMonth))].sort(),region=document.querySelector('#region');
@@ -54,9 +60,35 @@ function renderQuality(q){
  section.appendChild(table);
  const nav=document.querySelector('.sidebar nav');
  nav.insertAdjacentHTML('beforeend','<a href="#architecture"><i>⌘</i>Architecture</a><a href="#documentation"><i>▧</i>Documentation</a>');
- section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Raw preserves source records. Staging standardizes and checks them. The warehouse models conformed dimensions and transaction-grain facts. Marts define business measures, validation checks relationships and totals, and the static dashboard reads only precomputed files.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="../documentation/requirements/business_requirements.md">Business requirements ↗</a><a href="../documentation/architecture/architecture.md">Architecture &amp; ER model ↗</a><a href="../documentation/data_dictionary/data_dictionary.md">Data dictionary ↗</a><a href="../documentation/kpi_dictionary/kpi_dictionary.md">KPI definitions ↗</a><a href="../testing/validation_strategy.md">Quality strategy ↗</a><a href="../case-study/case_study.md">Case study ↗</a></div></section>`);
+ section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Raw preserves source records. Staging standardizes and checks them. The warehouse models conformed dimensions and transaction-grain facts. Marts define business measures, validation checks relationships and totals, and the static dashboard reads only precomputed files.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/requirements/business_requirements.md" target="_blank" rel="noreferrer">Business requirements ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/architecture/architecture.md" target="_blank" rel="noreferrer">Architecture &amp; ER model ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/data_dictionary/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/kpi_dictionary/kpi_dictionary.md" target="_blank" rel="noreferrer">KPI definitions ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/testing/validation_strategy.md" target="_blank" rel="noreferrer">Quality strategy ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Case study ↗</a></div></section>`);
 }
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function finishLoading(){
+ document.querySelector('.loader')?.setAttribute('aria-hidden','true');
+ document.body.classList.remove('is-loading');
+ if(prefersReducedMotion){document.body.classList.remove('reveal-ready');return}
+ requestAnimationFrame(()=>{
+  const targets='.kpi,.panel,.finding-grid,.explore,.placeholder-section';
+  if(window.gsap){
+   gsap.to(targets,{opacity:1,y:0,duration:.58,ease:'power3.out',stagger:.035,onComplete:()=>document.body.classList.remove('reveal-ready')});
+  }else{
+   document.body.classList.remove('reveal-ready');
+  }
+ });
+}
+function hydrateShell(){
+ const links=[...document.querySelectorAll('.sidebar nav a[href^="#"]')];
+ const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+ const setActive=id=>links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===`#${id}`));
+ links.forEach(a=>a.addEventListener('click',()=>setActive(a.getAttribute('href').slice(1))));
+ if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+   const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+   if(visible) setActive(visible.target.id);
+  },{rootMargin:'-18% 0px -70% 0px',threshold:[.05,.2,.45]});
+  sections.forEach(section=>observer.observe(section));
+ }
+}
 function renderTables(data){
  const specs=[
   ['#sales','Category revenue and margin',data.sales_by_category,[['CategoryName','Category'],['Revenue','Revenue','money'],['GrossProfit','Gross profit','money'],['GrossMarginPct','Gross margin','percent'],['Units','Units','number']]],
