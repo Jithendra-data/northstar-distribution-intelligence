@@ -18,6 +18,7 @@ async function loadDashboard(){
     renderTables(data);
     renderExecutiveSignals(data);
     renderLineage(data);
+    setupProjectPage(data);
     hydrateShell();
     finishLoading();
   }catch(error){document.querySelector('#revenue').textContent='Run export'; console.info(error.message); finishLoading()}
@@ -75,8 +76,7 @@ function renderQuality(q){
  const table=document.createElement('div');table.className='quality-list';
  table.innerHTML=tests.map(t=>`<div class="quality-row"><span>${t.TestName}</span><b class="${t.Status==='PASS'?'pass':'fail'}">${t.Status==='PASS'?'OK':'REVIEW'}</b><small>${integer(t.FailedRecords)} flagged / ${integer(t.RecordsChecked)} checked</small></div>`).join('');
  section.appendChild(table);
- const nav=document.querySelector('.sidebar nav');
- nav.insertAdjacentHTML('beforeend','<a href="#architecture"><i>⌘</i>Architecture</a><a href="#documentation"><i>▧</i>Documentation</a>');
+
  section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Raw preserves source records. Staging standardizes and checks them. The warehouse models conformed dimensions and transaction-grain facts. Marts define business measures, quality controls check relationships and totals, and the static dashboard reads only precomputed files.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/requirements/business_requirements.md" target="_blank" rel="noreferrer">Business requirements ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/architecture/architecture.md" target="_blank" rel="noreferrer">Architecture &amp; ER model ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/data_dictionary/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/kpi_dictionary/kpi_dictionary.md" target="_blank" rel="noreferrer">KPI definitions ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/testing/validation_strategy.md" target="_blank" rel="noreferrer">Control strategy ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Case study ↗</a></div></section>`);
 }
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -123,10 +123,10 @@ function hydrateShell(){
  const nav=document.querySelector('.sidebar nav');nav.appendChild(nav.querySelector('[href="#project-story"]'));
  nav.querySelector('[href="#sales"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ANALYTICS</div>');
  nav.querySelector('[href="#quality"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ENGINEERING</div>');
- setActive(location.hash.slice(1)||'overview');
+ setActive(['#architecture','#documentation'].includes(location.hash)?'project-story':location.hash.slice(1)||'overview');
  links.forEach(a=>a.addEventListener('click',()=>setActive(a.getAttribute('href').slice(1))));
  let queued=false;
- const updateNavigation=()=>{queued=false;const current=sections.filter(section=>section.getBoundingClientRect().top<=130).sort((a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().top)[0];setActive(current?.id||'overview')};
+ const updateNavigation=()=>{queued=false;const current=sections.filter(section=>section.getClientRects().length&&section.getBoundingClientRect().top<=130).sort((a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().top)[0];setActive(current?.id||'overview')};
  window.addEventListener('scroll',()=>{if(!queued){queued=true;requestAnimationFrame(updateNavigation)}},{passive:true});
 
 }

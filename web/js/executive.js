@@ -1,4 +1,20 @@
 /* Presentation derived only from the published dashboard contract. */
+function setupProjectPage(data){
+ const project=document.querySelector('#project-story'),overview=document.querySelector('#overview');
+ project.append(document.querySelector('#architecture'),document.querySelector('#documentation'));
+ const projectHashes=['#project-story','#architecture','#documentation'];
+ const sync=()=>{
+  const isProject=projectHashes.includes(location.hash);
+  project.hidden=!isProject;overview.hidden=isProject;
+  document.querySelector('.period').hidden=isProject;
+  document.querySelectorAll('.sidebar nav a').forEach(a=>{const active=isProject?a.hash==='#project-story':a.hash===(location.hash||'#overview');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')});
+  document.querySelector('.crumb').textContent=isProject?'NorthStar / Project & Architecture':'NorthStar / Executive overview';
+  requestAnimationFrame(()=>{const target=document.querySelector(projectHashes.includes(location.hash)?location.hash:location.hash&&/^#[a-z-]+$/.test(location.hash)?location.hash:'#overview');target?.scrollIntoView({behavior:'instant',block:'start'});if(!isProject)window.dispatchEvent(new Event('resize'))});
+ };
+ window.addEventListener('hashchange',sync);sync();
+ const rows=data.reconciliation||[],quality=document.querySelector('#quality');
+ quality.insertAdjacentHTML('beforeend',`<article class="trust-reconciliation"><h3>Source-to-dashboard reconciliation</h3><p>Compare raw source totals, fact totals, and the published dashboard. Variances below reflect this dataset's reconciliation results.</p><div class="table-scroll"><table><thead><tr><th scope="col">Measure</th><th scope="col">Raw</th><th scope="col">Fact</th><th scope="col">Dashboard</th><th scope="col">Variance</th><th scope="col">Result</th></tr></thead><tbody>${rows.map(r=>`<tr><th scope="row">${h(r.Measure)}</th><td>${h(money(r.RawValue))}</td><td>${h(money(r.FactValue))}</td><td>${h(money(r.DashboardValue))}</td><td>${h(Number(r.Variance).toPrecision(3))}</td><td>${r.Status==='PASS'?'OK':'REVIEW'}</td></tr>`).join('')||'<tr><td colspan="6">No reconciliation results available.</td></tr>'}</tbody></table></div><p class="trust-lineage"><b>Validation lineage:</b> Source records → transaction facts → published measures. Duplicate, orphan, date, and inventory controls above identify records requiring review. <a href="#architecture">Explore the full architecture →</a></p></article>`);
+}
 function kpiSparkline(values,label){
  const finite=values.filter(Number.isFinite),min=Math.min(...finite),max=Math.max(...finite);
  const point=(v,i)=>`${(4+i*152/Math.max(1,values.length-1)).toFixed(1)},${(34-(v-min)/(max-min||1)*28).toFixed(1)}`;
