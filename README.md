@@ -28,6 +28,14 @@ NorthStar turns fictional ERP-style distribution records into a public executive
 - **Architecture guide:** [documentation/architecture/architecture.md](documentation/architecture/architecture.md)
 - **Pipeline operations:** [documentation/operations/pipeline_operations.md](documentation/operations/pipeline_operations.md)
 
+
+## Creator contact
+
+Built by **Anumala Jithendra**.
+
+- **LinkedIn:** [linkedin.com/in/anumala-jithendra](https://www.linkedin.com/in/anumala-jithendra/)
+- **Email:** [jithendra.anumala1@gmail.com](mailto:jithendra.anumala1@gmail.com)
+
 ## Current published scenario
 
 Latest dashboard export currently published in this repository:
