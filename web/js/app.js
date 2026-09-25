@@ -63,6 +63,29 @@ function renderQuality(q){
  section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Raw preserves source records. Staging standardizes and checks them. The warehouse models conformed dimensions and transaction-grain facts. Marts define business measures, quality controls check relationships and totals, and the static dashboard reads only precomputed files.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/requirements/business_requirements.md" target="_blank" rel="noreferrer">Business requirements ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/architecture/architecture.md" target="_blank" rel="noreferrer">Architecture &amp; ER model ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/data_dictionary/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/kpi_dictionary/kpi_dictionary.md" target="_blank" rel="noreferrer">KPI definitions ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/testing/validation_strategy.md" target="_blank" rel="noreferrer">Control strategy ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Case study ↗</a></div></section>`);
 }
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function drawFallbackLineChart(dom, labels, series, options={}){
+ if(!dom)return;
+ const width=Math.max(320,dom.clientWidth||320),height=Math.max(220,dom.clientHeight||220),pad={top:18,right:18,bottom:34,left:42};
+ const flat=series.flatMap(s=>s.data).filter(v=>Number.isFinite(Number(v))).map(Number);
+ dom.innerHTML='';
+ if(!labels.length||!flat.length){dom.innerHTML='<div class="chart-empty">No chart data for the selected filters.</div>';return}
+ let min=Math.min(...flat),max=Math.max(...flat); if(min===max){min=min*.95;max=max*1.05}
+ if(options.zeroBase)min=Math.min(0,min);
+ const x=i=>labels.length===1?pad.left+(width-pad.left-pad.right)/2:pad.left+(i/(labels.length-1))*(width-pad.left-pad.right);
+ const y=v=>height-pad.bottom-((Number(v)-min)/(max-min||1))*(height-pad.top-pad.bottom);
+ const ticks=[0,.5,1].map(r=>min+(max-min)*r);
+ const linePath=data=>data.map((v,i)=>`${i?'L':'M'} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+ const areaPath=data=>`${linePath(data)} L ${x(data.length-1).toFixed(1)} ${height-pad.bottom} L ${x(0).toFixed(1)} ${height-pad.bottom} Z`;
+ const grid=ticks.map(t=>`<g><line x1="${pad.left}" x2="${width-pad.right}" y1="${y(t).toFixed(1)}" y2="${y(t).toFixed(1)}" stroke="#eef2f3" stroke-dasharray="4 4"/><text x="${pad.left-8}" y="${(y(t)+4).toFixed(1)}" text-anchor="end" fill="#82929b" font-size="9">${options.format?options.format(t):integer(t)}</text></g>`).join('');
+ const monthLabels=labels.filter((_,i)=>i===0||i===labels.length-1||i%6===0).map(label=>{const i=labels.indexOf(label);return `<text x="${x(i).toFixed(1)}" y="${height-12}" text-anchor="middle" fill="#82929b" font-size="9">${h(label)}</text>`}).join('');
+ const paths=series.map((s,i)=>`<path d="${areaPath(s.data)}" fill="${s.fill||'transparent'}"/><path d="${linePath(s.data)}" fill="none" stroke="${s.color}" stroke-width="${i?2:2.5}" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+ dom.innerHTML=`<svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${h(options.label||'Line chart')}">${grid}${monthLabels}${paths}</svg>`;
+}
+function drawFallbackCharts(rows){
+ const months=rows.map(x=>x.YearMonth), revenues=rows.map(x=>Number(x.Revenue)||0), profits=rows.map(x=>Number(x.GrossProfit)||0), margins=rows.map(x=>{const revenue=Number(x.Revenue)||0,profit=Number(x.GrossProfit)||0,stored=Number(x.GrossMarginPct);return Number.isFinite(stored)?stored*100:(revenue?profit/revenue*100:null)});
+ drawFallbackLineChart(document.querySelector('#trend'),months,[{data:revenues,color:'#2b9b8c',fill:'rgba(43,155,140,.10)'},{data:profits,color:'#5487dc',fill:'transparent'}],{label:'Revenue and gross profit trend',zeroBase:true,format:v=>`${integer(v)}`});
+ drawFallbackLineChart(document.querySelector('#margin-chart'),months,[{data:margins,color:'#d5a844',fill:'rgba(213,168,68,.12)'}],{label:'Gross margin percentage trend',format:v=>`${Number(v).toFixed(1)}%`});
+}
 function finishLoading(){
  document.querySelector('.loader')?.setAttribute('aria-hidden','true');
  document.body.classList.remove('is-loading');
@@ -113,9 +136,9 @@ function renderTables(data){
  });
 }
 function drawCharts(rows){
- if(!window.echarts)return;
+ if(!window.echarts){drawFallbackCharts(rows);return;}
  const trendDom=document.querySelector('#trend'),marginDom=document.querySelector('#margin-chart'),trend=echarts.getInstanceByDom(trendDom)||echarts.init(trendDom),margin=echarts.getInstanceByDom(marginDom)||echarts.init(marginDom);
- const months=rows.map(x=>x.YearMonth), revenues=rows.map(x=>x.Revenue), profits=rows.map(x=>x.GrossProfit), margins=rows.map(x=>x.GrossMarginPct*100);
+ const months=rows.map(x=>x.YearMonth), revenues=rows.map(x=>Number(x.Revenue)||0), profits=rows.map(x=>Number(x.GrossProfit)||0), margins=rows.map(x=>{const revenue=Number(x.Revenue)||0,profit=Number(x.GrossProfit)||0,stored=Number(x.GrossMarginPct);return Number.isFinite(stored)?stored*100:(revenue?profit/revenue*100:null)});
  const base={tooltip:{trigger:'axis',backgroundColor:'#173549',borderWidth:0,textStyle:{color:'#fff'}},grid:{left:42,right:18,top:20,bottom:35},xAxis:{type:'category',data:months,axisLabel:{color:'#82929b',fontSize:9},axisLine:{lineStyle:{color:'#e7edef'}},axisTick:{show:false}},yAxis:{type:'value',axisLabel:{color:'#82929b',fontSize:9,formatter:v=>`$${integer(v)}`},splitLine:{lineStyle:{color:'#eef2f3',type:'dashed'}}}};
  trend.setOption({...base,legend:{bottom:0,textStyle:{fontSize:10,color:'#71828b'}},series:[{name:'Revenue',type:'line',smooth:true,data:revenues,symbol:'none',lineStyle:{width:2.5,color:'#2b9b8c'},areaStyle:{color:'rgba(43,155,140,.10)'}},{name:'Gross profit',type:'line',smooth:true,data:profits,symbol:'none',lineStyle:{width:2,color:'#5487dc'}}]},true);
  margin.setOption({tooltip:{trigger:'axis'},grid:{left:40,right:16,top:18,bottom:35},xAxis:{type:'category',data:months,axisLabel:{color:'#82929b',fontSize:9},axisLine:{lineStyle:{color:'#e7edef'}},axisTick:{show:false}},yAxis:{type:'value',axisLabel:{color:'#82929b',fontSize:9,formatter:'{value}%'},splitLine:{lineStyle:{color:'#eef2f3',type:'dashed'}}},series:[{type:'line',smooth:true,data:margins,symbol:'none',lineStyle:{width:2.5,color:'#d5a844'},areaStyle:{color:'rgba(213,168,68,.12)'}}]},true);
