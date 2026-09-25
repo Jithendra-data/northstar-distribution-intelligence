@@ -16,7 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=public-20260924-5">
+    <link rel="stylesheet" href="css/styles.css?v=enterprise-20260924-6">
+    <link rel="stylesheet" href="css/enterprise.css?v=enterprise-20260924-6">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   </head>
   <body class="is-loading">
@@ -101,6 +102,31 @@
               <small>Generate, check, reconcile, deploy</small>
             </div>
           </div>
+          <div class="metric-heading"><h2>Performance at a glance</h2><span>Financial performance · operating exposure</span></div>
+          <div class="kpi-grid">
+            <article class="kpi"><div class="kpi-label">INVOICED REVENUE <span>↗</span></div><strong id="revenue">—</strong><small>Net posted invoice revenue</small></article>
+            <article class="kpi"><div class="kpi-label">GROSS PROFIT <span>◈</span></div><strong id="profit">—</strong><small><b id="margin">—</b> gross margin</small></article>
+            <article class="kpi"><div class="kpi-label">SALES ORDERS <span>▤</span></div><strong id="orders">—</strong><small>Distinct order headers</small></article>
+            <article class="kpi"><div class="kpi-label">CUSTOMERS <span>◎</span></div><strong id="customers-kpi">—</strong><small>Customers with invoiced activity</small></article>
+            <article class="kpi"><div class="kpi-label">INVENTORY VALUE <span>▦</span></div><strong id="inventory-kpi">—</strong><small>Calculated from inventory movements</small></article>
+            <article class="kpi"><div class="kpi-label">OPEN PO VALUE <span>⇄</span></div><strong id="po-value">—</strong><small>Outstanding unreceived commitment</small></article>
+          </div>
+          <div class="chart-grid">
+            <article class="panel wide"><div class="panel-head"><div><h2>Revenue &amp; gross profit</h2><p>Monthly posted invoice performance</p></div><span class="unit">USD</span></div><div id="trend" class="chart"></div><div class="chart-summary" id="trend-summary" aria-live="polite"></div></article>
+            <article class="panel"><div class="panel-head"><div><h2>Margin trend</h2><p>Gross profit as a share of revenue</p></div></div><div id="margin-chart" class="chart"></div><div class="chart-summary" id="margin-summary" aria-live="polite"></div></article>
+          </div>
+          <div class="section-heading"><div><div class="eyebrow">BUSINESS QUESTIONS</div><h2>Explore the operating picture</h2></div></div>
+          <div class="cards-grid">
+            <a class="explore" href="#sales"><span>01 / COMMERCIAL</span><h3>Where is growth coming from?</h3><p>Compare revenue, discount behavior, and gross profit by market and product.</p><b>Explore sales <i>↗</i></b></a>
+            <a class="explore" href="#inventory"><span>02 / WORKING CAPITAL</span><h3>Where is inventory exposed?</h3><p>See stock coverage, inbound supply, and slow-moving product risk.</p><b>Explore inventory <i>↗</i></b></a>
+            <a class="explore" href="#operations"><span>03 / SERVICE</span><h3>Where is service slipping?</h3><p>Track shipping speed, supplier reliability, and customer returns.</p><b>Explore operations <i>↗</i></b></a>
+          </div>
+          <section class="placeholder-section" id="sales"><span>01 / SALES &amp; MARGIN</span><h2>Revenue quality and margin performance</h2><p>Invoice-level sales, category mix, and sales representative performance.</p></section>
+          <section class="placeholder-section" id="customers"><span>02 / CUSTOMER INTELLIGENCE</span><h2>Retention, value, and concentration</h2><p>Customer lifetime value, recency, and segment detail.</p></section>
+          <section class="placeholder-section" id="inventory"><span>03 / INVENTORY</span><h2>Availability and working capital</h2><p>SKU availability, movement velocity, days on hand, and inbound supply.</p></section>
+          <section class="placeholder-section" id="purchasing"><span>04 / PURCHASING &amp; VENDORS</span><h2>Supplier delivery and cost performance</h2><p>Outstanding purchase commitments and supplier receipt performance.</p></section>
+          <section class="placeholder-section" id="operations"><span>05 / OPERATIONS</span><h2>Fulfillment and returns</h2><p>Warehouse service performance and customer return patterns.</p></section>
+          <section class="placeholder-section" id="quality"><span>06 / DATA TRUST</span><h2>Controls, lineage, and reconciliation</h2><p>Published control checks and source-to-dashboard reconciliation notes.</p></section>
           <section class="portfolio-story" id="project-story" aria-labelledby="project-story-title">
             <div class="story-intro">
               <span class="eyebrow">PUBLIC PROJECT OVERVIEW</span>
@@ -154,30 +180,6 @@
             </article>
           </section>
 
-          <div class="kpi-grid">
-            <article class="kpi"><div class="kpi-label">INVOICED REVENUE <span>↗</span></div><strong id="revenue">—</strong><small>Net posted invoice revenue</small></article>
-            <article class="kpi"><div class="kpi-label">GROSS PROFIT <span>◈</span></div><strong id="profit">—</strong><small><b id="margin">—</b> gross margin</small></article>
-            <article class="kpi"><div class="kpi-label">SALES ORDERS <span>▤</span></div><strong id="orders">—</strong><small>Distinct order headers</small></article>
-            <article class="kpi"><div class="kpi-label">CUSTOMERS <span>◎</span></div><strong id="customers-kpi">—</strong><small>Customers with invoiced activity</small></article>
-            <article class="kpi"><div class="kpi-label">INVENTORY VALUE <span>▦</span></div><strong id="inventory-kpi">—</strong><small>Calculated from inventory movements</small></article>
-            <article class="kpi"><div class="kpi-label">OPEN PO VALUE <span>⇄</span></div><strong id="po-value">—</strong><small>Outstanding unreceived commitment</small></article>
-          </div>
-          <div class="chart-grid">
-            <article class="panel wide"><div class="panel-head"><div><h2>Revenue &amp; gross profit</h2><p>Monthly posted invoice performance</p></div><span class="unit">USD</span></div><div id="trend" class="chart"></div></article>
-            <article class="panel"><div class="panel-head"><div><h2>Margin trend</h2><p>Gross profit as a share of revenue</p></div></div><div id="margin-chart" class="chart"></div></article>
-          </div>
-          <div class="section-heading"><div><div class="eyebrow">BUSINESS QUESTIONS</div><h2>Explore the operating picture</h2></div></div>
-          <div class="cards-grid">
-            <a class="explore" href="#sales"><span>01 / COMMERCIAL</span><h3>Where is growth coming from?</h3><p>Compare revenue, discount behavior, and gross profit by market and product.</p><b>Explore sales <i>↗</i></b></a>
-            <a class="explore" href="#inventory"><span>02 / WORKING CAPITAL</span><h3>Where is inventory exposed?</h3><p>See stock coverage, inbound supply, and slow-moving product risk.</p><b>Explore inventory <i>↗</i></b></a>
-            <a class="explore" href="#operations"><span>03 / SERVICE</span><h3>Where is service slipping?</h3><p>Track shipping speed, supplier reliability, and customer returns.</p><b>Explore operations <i>↗</i></b></a>
-          </div>
-          <section class="placeholder-section" id="sales"><span>01 / SALES &amp; MARGIN</span><h2>Revenue quality and margin performance</h2><p>Invoice-level sales, category mix, and sales representative performance.</p></section>
-          <section class="placeholder-section" id="customers"><span>02 / CUSTOMER INTELLIGENCE</span><h2>Retention, value, and concentration</h2><p>Customer lifetime value, recency, and segment detail.</p></section>
-          <section class="placeholder-section" id="inventory"><span>03 / INVENTORY</span><h2>Availability and working capital</h2><p>SKU availability, movement velocity, days on hand, and inbound supply.</p></section>
-          <section class="placeholder-section" id="purchasing"><span>04 / PURCHASING &amp; VENDORS</span><h2>Supplier delivery and cost performance</h2><p>Outstanding purchase commitments and supplier receipt performance.</p></section>
-          <section class="placeholder-section" id="operations"><span>05 / OPERATIONS</span><h2>Fulfillment and returns</h2><p>Warehouse service performance and customer return patterns.</p></section>
-          <section class="placeholder-section" id="quality"><span>06 / DATA TRUST</span><h2>Controls, lineage, and reconciliation</h2><p>Published control checks and source-to-dashboard reconciliation notes.</p></section>
           <footer class="site-footer">
             <div>
               <strong>NorthStar Distribution Intelligence</strong>
@@ -201,6 +203,6 @@
       </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-    <script src="js/app.js?v=public-20260924-5"></script>
+    <script src="js/app.js?v=enterprise-20260924-6"></script>
   </body>
 </html>
