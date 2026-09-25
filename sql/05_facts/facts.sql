@@ -1,0 +1,7 @@
+-- FactSales: one posted invoice line. FactInventory: one signed product/warehouse movement.
+CREATE TABLE dw.FactSales(InvoiceID varchar(12) NOT NULL, LineNumber int NOT NULL, DateKey int NOT NULL, CustomerKey int NOT NULL, ProductKey int NOT NULL, SalesRepKey int NULL, WarehouseKey int NULL, Quantity int NOT NULL, Revenue decimal(14,2) NOT NULL, COGS decimal(14,2) NOT NULL, GrossProfit decimal(14,2) NOT NULL, DiscountAmount decimal(14,2) NOT NULL, CONSTRAINT PK_FactSales PRIMARY KEY(InvoiceID,LineNumber));
+CREATE TABLE dw.FactInventory(InventoryTransactionID varchar(16) NOT NULL PRIMARY KEY, DateKey int NOT NULL, ProductKey int NOT NULL, WarehouseKey int NOT NULL, TransactionType varchar(24) NOT NULL, SignedQuantity decimal(14,2) NOT NULL, UnitCost decimal(12,2) NULL, ReferenceNumber varchar(20));
+CREATE TABLE dw.FactPurchasing(PONumber varchar(12) NOT NULL, LineNumber int NOT NULL, CreatedDateKey int NOT NULL, ExpectedDateKey int NOT NULL, VendorKey int NOT NULL, ProductKey int NOT NULL, WarehouseKey int NOT NULL, OrderedQuantity int NOT NULL, ReceivedQuantity int NOT NULL, RemainingQuantity int NOT NULL, UnitCost decimal(12,2) NOT NULL, LineAmount decimal(14,2) NOT NULL, CONSTRAINT PK_FactPurchasing PRIMARY KEY(PONumber,LineNumber));
+CREATE TABLE dw.FactReturns(ReturnID varchar(12) NOT NULL PRIMARY KEY, DateKey int NOT NULL, CustomerKey int NOT NULL, ProductKey int NOT NULL, WarehouseKey int NULL, ReturnQuantity int NOT NULL, ReturnAmount decimal(14,2) NOT NULL, ReturnReason varchar(40));
+GO
+
