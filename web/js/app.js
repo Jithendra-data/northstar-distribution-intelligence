@@ -121,7 +121,8 @@ function hydrateShell(){
  const sections=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
  const setActive=id=>links.forEach(a=>{const active=a.getAttribute('href')===`#${id}`;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current');if(active)document.querySelector('.crumb').textContent=`NorthStar / ${a.textContent.slice(1).trim()}`});
  const nav=document.querySelector('.sidebar nav');nav.appendChild(nav.querySelector('[href="#project-story"]'));
- nav.querySelector('[href="#quality"]').insertAdjacentHTML('beforebegin','<div class="nav-group">TRUST & RESOURCES</div>');
+ nav.querySelector('[href="#sales"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ANALYTICS</div>');
+ nav.querySelector('[href="#quality"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ENGINEERING</div>');
  setActive(location.hash.slice(1)||'overview');
  links.forEach(a=>a.addEventListener('click',()=>setActive(a.getAttribute('href').slice(1))));
  let queued=false;
