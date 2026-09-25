@@ -16,8 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=enterprise-20260924-6">
-    <link rel="stylesheet" href="css/enterprise.css?v=enterprise-20260924-6">
+    <link rel="stylesheet" href="css/styles.css?v=executive-20260924-7">
+    <link rel="stylesheet" href="css/enterprise.css?v=executive-20260924-7">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   </head>
   <body class="is-loading">
@@ -57,7 +57,7 @@
         </nav>
         <div class="sidebar-bottom">
           <div class="status-dot"></div>
-          <span>Portfolio environment<br><small>Static analytics · live Pages deployment</small></span>
+          <span>Analytics workspace<br><small>Published intelligence · synthetic data</small></span>
         </div>
       </aside>
       <main class="main">
@@ -89,12 +89,8 @@
                   </select>
                 </div>
               </div>
-              <div class="notice">Portfolio Project - All data shown in this application is synthetically generated and does not represent any real company, customer, vendor, or transaction.</div>
-              <div class="hero-actions" aria-label="Portfolio project links">
-                <a class="primary-action" href="https://github.com/Jithendra-data/northstar-distribution-intelligence" target="_blank" rel="noreferrer">View GitHub repo</a>
-                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml" target="_blank" rel="noreferrer">Run refresh workflow</a>
-                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Read case study</a>
-              </div>
+              <div class="notice">Synthetic-data environment — All data shown in this application is synthetically generated and does not represent any real company, customer, vendor, or transaction.</div>
+
             </div>
             <div class="hero-status" aria-label="Pipeline status">
               <span>PIPELINE</span>
@@ -105,7 +101,7 @@
           <div class="metric-heading"><h2>Performance at a glance</h2><span>Financial performance · operating exposure</span></div>
           <div class="kpi-grid">
             <article class="kpi"><div class="kpi-label">INVOICED REVENUE <span>↗</span></div><strong id="revenue">—</strong><small>Net posted invoice revenue</small></article>
-            <article class="kpi"><div class="kpi-label">GROSS PROFIT <span>◈</span></div><strong id="profit">—</strong><small><b id="margin">—</b> gross margin</small></article>
+            <article class="kpi"><div class="kpi-label">GROSS PROFIT <span>◈</span></div><strong id="profit">—</strong><small>Net revenue less cost of goods · <b id="margin">—</b> margin</small></article>
             <article class="kpi"><div class="kpi-label">SALES ORDERS <span>▤</span></div><strong id="orders">—</strong><small>Distinct order headers</small></article>
             <article class="kpi"><div class="kpi-label">CUSTOMERS <span>◎</span></div><strong id="customers-kpi">—</strong><small>Customers with invoiced activity</small></article>
             <article class="kpi"><div class="kpi-label">INVENTORY VALUE <span>▦</span></div><strong id="inventory-kpi">—</strong><small>Calculated from inventory movements</small></article>
@@ -133,6 +129,11 @@
               <h2 id="project-story-title">A complete analytics engineering project, from synthetic ERP data to executive decisions.</h2>
               <p>This project demonstrates how a distribution business can turn operational records into trusted KPIs, risk signals, and self-service analysis. The data is fictional, but the architecture mirrors a real BI delivery workflow: generate source records, clean and model them, check quality, export dashboard-ready JSON, and publish a live executive experience.</p>
             </div>
+              <div class="hero-actions" aria-label="Project resources">
+                <a class="primary-action" href="https://github.com/Jithendra-data/northstar-distribution-intelligence" target="_blank" rel="noreferrer">View GitHub repo</a>
+                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml" target="_blank" rel="noreferrer">Run refresh workflow</a>
+                <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Read case study</a>
+              </div>
             <div class="story-proof">
               <article><b>Automated</b><span>GitHub Actions refreshes the synthetic scenario and redeploys the dashboard.</span></article>
               <article><b>Modeled</b><span>Raw records are shaped into dimensions, facts, KPIs, and analytics marts.</span></article>
@@ -184,7 +185,7 @@
             <div>
               <strong>NorthStar Distribution Intelligence</strong>
               <span>·</span>
-              <span>Fictional portfolio project</span>
+              <span>Synthetic-data demonstration</span>
               <span>·</span>
               <span>Built by Anumala Jithendra</span>
             </div>
@@ -203,6 +204,7 @@
       </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-    <script src="js/app.js?v=enterprise-20260924-6"></script>
+    <script src="js/executive.js?v=executive-20260924-7"></script>
+    <script src="js/app.js?v=executive-20260924-7"></script>
   </body>
 </html>

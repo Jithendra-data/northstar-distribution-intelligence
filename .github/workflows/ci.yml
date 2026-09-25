@@ -22,4 +22,6 @@ jobs:
       - name: Validate dashboard JSON
         run: python -m json.tool web/data/dashboard.json > /tmp/dashboard.json
       - name: Validate JavaScript syntax
-        run: node --check web/js/app.js
+        run: |
+          node --check web/js/app.js
+          node --check web/js/executive.js

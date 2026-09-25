@@ -16,6 +16,8 @@ async function loadDashboard(){
     renderFindings(data.business_findings||{});
     renderQuality(data.data_quality||{});
     renderTables(data);
+    renderExecutiveSignals(data);
+    renderLineage(data);
     hydrateShell();
     finishLoading();
   }catch(error){document.querySelector('#revenue').textContent='Run export'; console.info(error.message); finishLoading()}
@@ -33,7 +35,7 @@ function setupFilters(data,k){
    const grouped=new Map();for(const r of chosen){const x=grouped.get(r.YearMonth)||{YearMonth:r.YearMonth,Revenue:0,GrossProfit:0,Units:0,Invoices:0,Orders:0};for(const key of ['Revenue','GrossProfit','Units','Invoices','Orders'])x[key]+=Number(r[key]||0);grouped.set(r.YearMonth,x)}
    const trend=[...grouped.values()].sort((a,b)=>a.YearMonth.localeCompare(b.YearMonth)),rev=trend.reduce((s,x)=>s+x.Revenue,0),gp=trend.reduce((s,x)=>s+x.GrossProfit,0),orderCount=trend.reduce((s,x)=>s+x.Orders,0);
    const toYear=Number(to.slice(0,4)),fromMonth=Number(from.slice(5,7)),toMonth=Number(to.slice(5,7)),samePeriod=rows.filter(r=>Number(r.YearMonth.slice(0,4))===toYear&&Number(r.YearMonth.slice(5,7))>=fromMonth&&Number(r.YearMonth.slice(5,7))<=toMonth&&(region.value==='all'||r.Region===region.value)).reduce((s,r)=>s+Number(r.Revenue||0),0),priorPeriod=rows.filter(r=>Number(r.YearMonth.slice(0,4))===toYear-1&&Number(r.YearMonth.slice(5,7))>=fromMonth&&Number(r.YearMonth.slice(5,7))<=toMonth&&(region.value==='all'||r.Region===region.value)).reduce((s,r)=>s+Number(r.Revenue||0),0),yoy=priorPeriod?(samePeriod-priorPeriod)/priorPeriod:null;
-   document.querySelector('#revenue').textContent=money(rev);document.querySelector('#profit').textContent=money(gp);document.querySelector('#margin').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#gm-kpi').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#yoy').textContent=yoy==null?'—':`${yoy>=0?'+':''}${(yoy*100).toFixed(1)}%`;document.querySelector('#orders').textContent=integer(orderCount);document.querySelector('.period').textContent=`${from} — ${to}`;drawCharts(trend);renderMetricContext(trend,from,to,region.value);
+   document.querySelector('#revenue').textContent=money(rev);document.querySelector('#profit').textContent=money(gp);document.querySelector('#margin').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#gm-kpi').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#yoy').textContent=yoy==null?'—':`${yoy>=0?'+':''}${(yoy*100).toFixed(1)}%`;document.querySelector('#orders').textContent=integer(orderCount);document.querySelector('.period').textContent=`${from} — ${to}`;drawCharts(trend);renderMetricContext(trend,from,to,region.value);polishKpis(data,trend,from,to,region.value);
  }
  dates.addEventListener('change',apply);region.addEventListener('change',apply);apply();
 }
@@ -63,7 +65,7 @@ function renderFindings(f){
   ['DISCOUNT & MARGIN',`${((last.discount_rate||0)*100).toFixed(1)}% discount`,`Snacks margin ${((first.gross_margin||0)*100).toFixed(1)}% → ${((last.gross_margin||0)*100).toFixed(1)}%`],
   ['PRODUCT QUALITY',`${((f.health_2025_return_amount_rate||0)*100).toFixed(1)}% returns`,`Health return amount as a share of 2025 revenue`]
  ];
- el.innerHTML=`<div class="finding-heading"><span>FULL DATASET · INVESTIGATION SIGNALS</span><b>Executive attention</b></div><div class="finding-cards">${cards.map((c,i)=>`<article><small>${c[0]}</small><strong>${c[1]}</strong><p>${c[2]}</p><a class="insight-link" href="#${['purchasing','operations','inventory','customers','sales','operations'][i]}">Investigate signal <span aria-hidden="true">→</span></a></article>`).join('')}</div>`;
+ el.innerHTML=`<div class="finding-heading"><span>FULL DATASET · INVESTIGATION SIGNALS</span><b>Business observations</b></div><div class="finding-cards">${cards.map((c,i)=>`<article><small>${c[0]}</small><strong>${c[1]}</strong><p>${c[2]}</p><a class="insight-link" href="#${['purchasing','operations','inventory','customers','sales','operations'][i]}">Investigate signal <span aria-hidden="true">→</span></a></article>`).join('')}</div>`;
  document.querySelector('.chart-grid').insertAdjacentElement('afterend',el);
 }
 function renderQuality(q){
