@@ -1,0 +1,6 @@
+{
+  "name": "northstar-verification",
+  "private": true,
+  "scripts": {"test": "node --test tests/metrics.test.cjs", "test:browser": "node tests/browser.cjs"},
+  "devDependencies": {"playwright": "1.62.1"}
+}

@@ -1,11 +1,10 @@
 name: Project quality checks
-
 on:
-  push:
-    branches: [main]
   pull_request:
   workflow_dispatch:
-
+  workflow_call:
+permissions:
+  contents: read
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -15,13 +14,28 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-      - name: Install dependencies
-        run: python -m pip install -r requirements.txt
-      - name: Run small pipeline smoke test
-        run: python -m etl.run_pipeline --orders 1000 --purchase-orders 250
-      - name: Validate dashboard JSON
-        run: python -m json.tool web/data/dashboard.json > /tmp/dashboard.json
-      - name: Validate JavaScript syntax
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "11.19.0"
+      - run: python -m pip install -r requirements.txt
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Unit and reporting regression tests
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          node --test tests/metrics.test.cjs
+      - name: Isolated pipeline and replay integration
+        run: python -m tests.smoke_pipeline
+      - name: Validate published dataset
+        run: python -m validation.publication
+      - name: Browser regression and failure recovery
+        run: pnpm test:browser
+      - name: JavaScript syntax
         run: |
           node --check web/js/app.js
           node --check web/js/executive.js
+          node --check web/js/metrics.js
+          node --check web/js/reliability.js

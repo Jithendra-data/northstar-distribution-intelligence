@@ -15,7 +15,7 @@ def clean_file(path: Path, output: Path) -> pd.DataFrame:
         frame[col] = frame[col].astype("string").str.strip().replace({"": pd.NA})
     for col in DATE_COLUMNS.get(path.stem, []):
         if col in frame: frame[col] = pd.to_datetime(frame[col], errors="coerce")
-    # Keep all rows for auditability; record flagged rows alongside the normalized copy.
+    # Preserve all rows; the orchestrator validates before this normalization step. No quarantine service is implemented.
     frame.to_csv(output / path.name, index=False, date_format="%Y-%m-%d")
     return frame
 

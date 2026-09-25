@@ -1,4 +1,7 @@
-# Validation Strategy
+# Validation strategy
 
-Run deterministic generation, key/relationship checks, domain checks, transaction-to-fact transformations, and raw-to-mart reconciliation. Quality tests report denominator and failed row count. Intentional exceptions should be visible and classified, not mistaken for clean source data. Reconciliation tolerances are zero for copied additive monetary/quantity measures, with rounding tolerance documented for derived values.
+Run Python unit tests, pure-JavaScript metric tests, isolated full-pipeline replay, and persistent browser regression before deployment. The published contract itself must pass the publication validator. Smoke tests never overwrite the checked-in public dataset.
 
+Mandatory failures block publication: unexpected source checks, PK/FK resolution, missing/nonfinite contract measures, or any of five reconciliation failures. The only allowed synthetic exception is Negative ending on-hand; it is explicitly labeled EXPECTED_SCENARIO. A real ERP ingestion policy does not inherit that exception.
+
+Tests and evidence: see documentation/engineering/decisions.md. No claim is made that these tests establish comprehensive security, accessibility conformance, finance certification, or enterprise-scale performance.

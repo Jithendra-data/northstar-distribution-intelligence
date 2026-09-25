@@ -16,8 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=executive-20260924-9">
-    <link rel="stylesheet" href="css/enterprise.css?v=executive-20260924-9">
+    <link rel="stylesheet" href="css/styles.css?v=evidence-20260925-1">
+    <link rel="stylesheet" href="css/enterprise.css?v=evidence-20260925-1">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
   </head>
   <body class="is-loading">
@@ -45,6 +45,7 @@
           </div>
         </div>
         <div class="nav-label">OVERVIEW</div>
+        <label class="mobile-nav-label" for="mobile-nav">Open section</label><select id="mobile-nav" class="mobile-nav" aria-label="Open section"></select>
         <nav>
           <a class="active" href="#overview"><i>◫</i>Executive overview</a>
           <a href="#project-story"><i>✦</i>Project &amp; Architecture</a>
@@ -69,13 +70,14 @@
           </div>
         </header>
         <section class="content" id="overview">
+          <div class="executive-home">
           <div class="hero-panel">
             <div class="hero-copy">
               <div class="eyebrow">EXECUTIVE INTELLIGENCE <span class="live-tag">SYNTHETIC DATA</span></div>
               <div class="title-row">
                 <div>
-                  <h1>Distribution overview</h1>
-                  <p class="subtitle">A connected operating view of growth, margin, working capital, and service.</p>
+                  <h1>Margin, working capital &amp; service</h1>
+                  <p class="subtitle">Identify margin leakage, inventory exposure, and service delays across a synthetic distribution network.</p>
                 </div>
                 <div class="filter">
                   <label for="region">REGION</label>
@@ -116,6 +118,8 @@
             <a class="explore" href="#inventory"><span>02 / WORKING CAPITAL</span><h3>Where is inventory exposed?</h3><p>See stock coverage, inbound supply, and slow-moving product risk.</p><b>Explore inventory <i>↗</i></b></a>
             <a class="explore" href="#operations"><span>03 / SERVICE</span><h3>Where is service slipping?</h3><p>Track shipping speed, supplier reliability, and customer returns.</p><b>Explore operations <i>↗</i></b></a>
           </div>
+          <section id="operating-evidence" class="operating-evidence"></section>
+          </div>
           <section class="placeholder-section" id="sales"><span>01 / SALES &amp; MARGIN</span><h2>Revenue quality and margin performance</h2><p>Invoice-level sales, category mix, and sales representative performance.</p></section>
           <section class="placeholder-section" id="customers"><span>02 / CUSTOMER INTELLIGENCE</span><h2>Retention, value, and concentration</h2><p>Customer lifetime value, recency, and segment detail.</p></section>
           <section class="placeholder-section" id="inventory"><span>03 / INVENTORY</span><h2>Availability and working capital</h2><p>SKU availability, movement velocity, days on hand, and inbound supply.</p></section>
@@ -134,7 +138,7 @@
               <span>·</span>
               <span>Synthetic-data demonstration</span>
               <span>·</span>
-              <span>Built by Anumala Jithendra</span>
+              <a href="#contribution">Anumala Jithendra · Contribution &amp; decisions</a> <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/commits/main/">Release history</a>
             </div>
             <div class="creator-links" aria-label="Creator contact links">
               <a href="https://www.linkedin.com/in/anumala-jithendra/" target="_blank" rel="noreferrer" aria-label="Anumala Jithendra on LinkedIn">
@@ -152,42 +156,39 @@
             <div class="project-page-heading"><h1>Project &amp; Architecture</h1><a href="#overview">← Executive overview</a></div>
             <div class="story-intro">
               <span class="eyebrow">PUBLIC PROJECT OVERVIEW</span>
-              <h2 id="project-story-title">A complete analytics engineering project, from synthetic ERP data to executive decisions.</h2>
-              <p>This project demonstrates how a distribution business can turn operational records into trusted KPIs, risk signals, and self-service analysis. The data is fictional, but the architecture mirrors a real BI delivery workflow: generate source records, clean and model them, check quality, export dashboard-ready JSON, and publish a live executive experience.</p>
+              <h2 id="project-story-title">How NorthStar turns distribution records into operating decisions.</h2>
+              <p>Decision owners are finance, inventory planning, procurement, and sales operations. The implemented pipeline validates synthetic source records, normalizes staging CSVs, loads an enforced SQLite dimensional warehouse, computes SQL/Python analytics, reconciles five measures, and publishes only an approved dataset. Real ERP connectors and a hosted SQL Server deployment are not implemented.</p>
             </div>
               <div class="hero-actions" aria-label="Project resources">
                 <a class="primary-action" href="https://github.com/Jithendra-data/northstar-distribution-intelligence" target="_blank" rel="noreferrer">View GitHub repo</a>
                 <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml" target="_blank" rel="noreferrer">Run refresh workflow</a>
                 <a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Read case study</a>
               </div>
-            <div class="story-proof">
-              <article><b>Automated</b><span>GitHub Actions refreshes the synthetic scenario and redeploys the dashboard.</span></article>
-              <article><b>Modeled</b><span>Raw records are shaped into dimensions, facts, KPIs, and analytics marts.</span></article>
-              <article><b>Controlled</b><span>Quality controls reconcile duplicates, orphan records, invalid dates, and inventory exceptions.</span></article>
-            </div>
+            <nav class="project-tabs" aria-label="Project sections"><a href="#project-story">Business case</a><a href="#architecture">Architecture</a><a href="#implementation">Implementation</a><a href="#run-evidence">Results</a><a href="#contribution">Contribution</a><a href="#documentation">Documentation</a></nav>
+            <section class="capability-matrix"><h3>Implemented, designed, and planned</h3><p><b>Implemented:</b> synthetic generation, validated staging, SQLite dimensional loading, SQL monthly sales, Python operational aggregates, publication gates, reproducible manifests, regression tests, static BI.</p><p><b>Designed:</b> SQL Server DDL and enterprise integration/security contracts.</p><p><b>Planned:</b> real ERP connectivity, SSO, row-level permissions, SCD Type 2, production CDC, and a private warehouse service.</p></section>
             <div class="portfolio-grid">
               <article class="portfolio-card tech-card">
                 <span>TECH STACK</span>
-                <h3>Tools shown in this build</h3>
+                <h3>Technology choices and trade-offs</h3>
                 <div class="tech-pills">
-                  <b>Python</b><b>SQL</b><b>Star schema</b><b>Analytics marts</b><b>Data quality</b><b>GitHub Actions</b><b>ECharts</b><b>GitHub Pages</b>
+                  <b>Python</b><b>SQL</b><b>SQLite reference warehouse</b><b>Analytics marts</b><b>Data quality</b><b>GitHub Actions</b><b>ECharts</b><b>GitHub Pages</b>
                 </div>
               </article>
               <article class="portfolio-card impact-card">
-                <span>BUSINESS IMPACT</span>
-                <h3>Questions the dashboard answers</h3>
+                <span>BUSINESS CASE · NO REALIZED SAVINGS CLAIMED</span>
+                <h3>Decisions supported and value to validate</h3>
                 <ul>
-                  <li>Where are revenue and margin improving or slipping?</li>
-                  <li>Which inventory positions create working capital risk?</li>
-                  <li>Which vendors and warehouses are affecting service?</li>
-                  <li>Which customers show retention or inactivity risk?</li>
+                  <li>Finance: investigate margin drivers before pricing decisions.</li>
+                  <li>Planning: review no-movement stock before replenishment.</li>
+                  <li>Procurement: confirm overdue supply and vendor actions.</li>
+                  <li>Sales: prioritize valuable inactive accounts for review.</li>
                 </ul>
               </article>
             </div>
             <article class="pipeline-card">
               <div>
                 <span>DATA FLOW</span>
-                <h3>How the data moves through the project</h3>
+                <h3>How the data moves through the project</h3><p>Monthly sales uses the SQLite warehouse. Operational analytics also read validated staging directly.</p>
               </div>
               <div class="portfolio-flow" aria-label="Data flow from source generation to dashboard">
                 <b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Quality controls</b><i>→</i><b>dashboard.json</b><i>→</i><b>Hosted dashboard</b>
@@ -200,16 +201,22 @@
               </div>
               <ol>
                 <li><b>Generate</b><small>Create a new synthetic distribution scenario.</small></li>
-                <li><b>Transform</b><small>Clean raw files and rebuild marts/KPIs.</small></li>
-                <li><b>Check</b><small>Run quality controls and reconciliation rules.</small></li>
-                <li><b>Publish</b><small>Export dashboard JSON and deploy to GitHub Pages.</small></li>
+                <li><b>Transform</b><small>Validate sources, normalize staging, and load SQLite facts.</small></li>
+                <li><b>Check</b><small>Block mandatory failures; document synthetic exceptions.</small></li>
+                <li><b>Publish</b><small>Approve the candidate, replace atomically, then deploy.</small></li>
               </ol>
             </article>
+            <section id="implementation" class="project-evidence"><h2>Implementation decisions and operating limits</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/engineering/decisions.md">Technical decisions and recovery</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/engineering/integration_contract.md">Mock ERP integration contract</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/engineering/security_and_scale.md">Private-deployment security and scale</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/tree/main/tests">Executable regression evidence</a></div><p>The public site contains synthetic data only. SQLite is a portable reference implementation, not a multi-user enterprise warehouse. Full rebuilds are deliberate at this scale; incremental CDC and historical master data require additional implementation.</p></section>
+            <section id="run-evidence" class="project-evidence"><h3>Published-run evidence</h3><p>Load the dataset to see measured runtime, row counts, dependencies, and input hashes.</p></section>
+            <section id="value-model" class="project-evidence"><h2>Potential value to validate in a pilot</h2><p>These assumptions model opportunities; they are not measured savings. Baseline labor, intervention cost, recovery feasibility, and sustained outcomes require a real pilot.</p><div class="value-inputs"><label>Disposition candidate share (%)<input id="assumption-stock" type="number" min="0" max="100" value="10"></label><label>Annual carrying-cost assumption (%)<input id="assumption-carry" type="number" min="0" max="100" value="20"></label><label>Attainable margin change (percentage points)<input id="assumption-margin" type="number" min="0" max="10" step="0.1" value="0.5"></label></div><p id="value-output" aria-live="polite">Load the dataset to calculate the illustrative opportunity.</p><p>Reporting effort saved = baseline preparation hours − assisted preparation hours. Net benefit = verified benefits − implementation and operating costs. No ROI percentage is claimed.</p></section>
+            <section id="contribution" class="project-evidence"><h2>Project ownership and contribution</h2><p><b>Project owner: Anumala Jithendra.</b> This portfolio was developed iteratively with AI-assisted implementation. Product direction, review requests, and acceptance criteria are documented in the project evolution. The repository is the evidence for implemented functionality; it is not a claim of unaided authorship or professional deployment experience.</p><p>Technical discussion topics: period-comparison correctness, staging lineage, enforced dimensional keys, independent reconciliation, publication failures, bounded browser extracts, and the trade-offs of a static public demonstration.</p><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/commits/main/">Review implementation history →</a></section>
           </section>
       </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-    <script src="js/executive.js?v=executive-20260924-9"></script>
-    <script src="js/app.js?v=executive-20260924-9"></script>
+    <script src="js/metrics.js?v=evidence-20260925-1"></script>
+    <script src="js/reliability.js?v=evidence-20260925-1"></script>
+    <script src="js/executive.js?v=evidence-20260925-1"></script>
+    <script src="js/app.js?v=evidence-20260925-1"></script>
   </body>
 </html>

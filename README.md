@@ -1,106 +1,58 @@
-# NorthStar Distribution Intelligence Platform
+# NorthStar Distribution Intelligence
 
-[![Live Dashboard](https://img.shields.io/badge/Live-Dashboard-168575?style=for-the-badge)](https://jithendra-data.github.io/northstar-distribution-intelligence/)
-[![Refresh Workflow](https://img.shields.io/badge/GitHub_Actions-Refresh_Pipeline-2f6fed?style=for-the-badge)](https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml)
-[![GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222?style=for-the-badge)](https://jithendra-data.github.io/northstar-distribution-intelligence/)
+[Live application](https://jithendra-data.github.io/northstar-distribution-intelligence/) · [Project & Architecture](https://jithendra-data.github.io/northstar-distribution-intelligence/#project-story) · [Actions](https://github.com/Jithendra-data/northstar-distribution-intelligence/actions)
 
-An end-to-end synthetic ERP analytics portfolio project for a fictional wholesale distributor. It demonstrates Python data generation, SQL Server-compatible modeling, analytics engineering, quality controls, reconciliation, operational reports, and a static executive dashboard.
+NorthStar helps a fictional distribution leadership team investigate margin movement, stock exposure, overdue purchasing, inactive customers, and service gaps. All records are synthetic. No real customer outcome, recovered revenue, or ROI is claimed.
 
-> **Portfolio Project — All data shown in this application is synthetically generated and does not represent any real company, customer, vendor, or transaction.**
+## What runs today
 
-## 30-second project summary
+Synthetic ERP CSV → mandatory source validation → normalized staging CSV → enforced SQLite reference warehouse → SQL monthly sales + Python operational analytics → independent source/warehouse/dashboard reconciliation → approved JSON → static browser application.
 
-NorthStar turns fictional ERP-style distribution records into a public executive analytics experience. The project generates linked orders, invoices, purchasing, inventory, customer, product, vendor, and return records; models them into SQL-friendly facts, dimensions, and marts; runs quality and reconciliation controls; exports dashboard-ready JSON; and publishes a hosted GitHub Pages dashboard.
+Four SQLite facts and six dimensions are actually populated by `etl/warehouse.py`. `sql/sqlite/warehouse.sql` is executed. The T-SQL directories are a separate SQL Server deployment design, not an active SQL Server service. Operational calculations read staging directly; the architecture diagram shows that branch.
 
-## Project highlights
+| Implemented | Designed | Not implemented |
+|---|---|---|
+| Source controls, normalized staging, SQLite facts, SQL/Python aggregates, five reconciliations, fail-closed publication, hashes and timings, unit/integration/browser tests | SQL Server DDL, private deployment security, ERP source contract | Real ERP connection, SSO/RLS, production CDC, SCD Type 2, multi-user warehouse, validated business ROI |
 
-- Automated synthetic ERP refresh through GitHub Actions with traceable scenario seed and timestamp.
-- Star schema design with invoice, inventory, purchasing, and returns fact grains.
-- Quality and reconciliation controls that expose duplicate, orphan, date, relationship, and inventory exceptions.
-- Hosted dashboard with executive KPIs, date/region filters, charts, paged tables, search, and CSV exports.
-- Public documentation covering requirements, architecture, KPI definitions, data dictionary, operations, and case study.
-
-## Live project
-
-- **Dashboard:** https://jithendra-data.github.io/northstar-distribution-intelligence/
-- **Refresh workflow:** https://github.com/Jithendra-data/northstar-distribution-intelligence/actions/workflows/refresh-data.yml
-- **Case study:** [case-study/case_study.md](case-study/case_study.md)
-- **Architecture guide:** [documentation/architecture/architecture.md](documentation/architecture/architecture.md)
-- **Pipeline operations:** [documentation/operations/pipeline_operations.md](documentation/operations/pipeline_operations.md)
-
-
-## Creator contact
-
-Built by **Anumala Jithendra**.
-
-- **LinkedIn:** [linkedin.com/in/anumala-jithendra](https://www.linkedin.com/in/anumala-jithendra/)
-- **Email:** [jithendra.anumala1@gmail.com](mailto:jithendra.anumala1@gmail.com)
-
-## Current published scenario
-
-Latest dashboard export currently published in this repository:
-
-| Metric | Value |
-|---|---:|
-| Scenario seed | `36084094524` |
-| Invoiced revenue | `$27.97M` |
-| Gross profit | `$10.35M` |
-| Gross margin | `37.0%` |
-| Sales orders | `75,000` |
-| Customers with invoiced activity | `4,982` |
-| Inventory value | `$6.62M` |
-| Open PO value | `$4.19M` |
-| Quality controls reviewed | `20` |
-| Inventory positions flagged for review | `1,959` |
-
-## Business questions answered
-
-- Where are revenue and gross margin improving or slipping?
-- Which products, regions, and customers drive commercial performance?
-- Which inventory positions create stockout or working capital risk?
-- Which vendors and warehouses affect service reliability?
-- Which customer segments show inactivity or retention risk?
-
-## Architecture
-
-```text
-Synthetic ERP → Raw CSV → Staging SQL → Star schema → Analytics marts
-                                                   ├─ Quality/reconciliation
-                                                   ├─ Python exception reports
-                                                   └─ JSON → HTML/CSS/JS dashboard → GitHub Pages
-```
-
-## Technology
-
-Python, pandas, NumPy, Faker, SQL Server-compatible T-SQL, analytics marts, data quality checks, GitHub Actions, GitHub Pages, HTML5, CSS3, JavaScript, Apache ECharts.
-
-## Generate data locally
+## Run and verify
 
 ```bash
 python -m pip install -r requirements.txt
 python -m etl.run_pipeline
+python -m unittest discover -s tests -p 'test_*.py' -v
+python -m tests.smoke_pipeline
+node --test tests/metrics.test.cjs
+pnpm install --frozen-lockfile
+pnpm exec playwright install chromium
+pnpm test:browser
+python -m http.server 8000 --directory web
 ```
 
-The default configuration generates 5,000 customers, 2,000 products, 150 vendors, 25 reps, 75,000 orders and 10,000 purchase orders over 2023–2025 with a fixed local seed, then cleans, summarizes, validates, reconciles, and exports. Use `--orders 1000 --purchase-orders 250` for a smaller generated run or `--skip-generation` to reuse existing raw extracts. Raw CSVs are written under `data/raw/` and are excluded from Git by default.
+`--skip-generation` reuses raw files and explicitly records an unknown scenario seed; input hashes identify the files. `--workspace .test-run` isolates all generated files. Defaults: 75,000 order headers, 10,000 PO headers, 5,000 customers, 2,000 products, four warehouses, and business dates in 2023–2025. Repeated full builds of the same inputs are idempotent; generated timestamps and runtime measurements are intentionally different.
 
-## Project layout
+## Trust and evidence
 
-`python/` generators and ETL; `sql/` database layers and marts; `validation/` quality and reconciliation; `automation/` exception reports; `web/` static application and JSON; `documentation/` requirements, architecture, dictionaries and strategy; `case-study/` narrative.
+Mandatory failures block publication. The synthetic negative-stock scenario is the only expected control exception; it is not accepted by a real ERP integration policy. Five measures independently reconcile raw records, SQLite SQL queries, and published KPI values. The candidate replaces `dashboard.json` only after serialization and validation. Failed runs retain the last approved public file.
 
-## Dashboard and publishing
+The current run's values, fact row counts, runtime, model/export Python allocation peak, dependencies, and input hashes are published in `web/data/dashboard.json`. The downloadable Actions artifact also includes the SQLite file and run manifest with actual payload bytes/hash. These are measured single-run results, not an enterprise scale benchmark. No static 'current scenario' numbers are copied here because automated refresh changes them.
 
-Run `python -m etl.run_pipeline`, then serve locally with `python -m http.server 8000 --directory web` and open `http://localhost:8000`. The dashboard has executive filters, calculated scenario findings, searchable/sortable paged detail tables, CSV downloads, architecture, documentation, data quality, and reconciliation views. The included Pages workflow deploys the `web/` directory on pushes to `main`; enable GitHub Pages with **GitHub Actions** as the build source. The dashboard requires no database server.
+## Product scope
 
-## Automated refresh and pipeline visibility
+Overview financial filters compare the exact selected interval to that interval one year earlier. Partial prior coverage is not reported as YoY. Snapshot metrics and signals use the full dataset. Each detail table states its export cap, eligible population, and selection rule; downloads contain the displayed extract. Three investigation queues expose inventory, inactive-customer, and overdue-PO evidence. SQL Server and private API deployment remain separate design work.
 
-`Refresh synthetic analytics data` runs every Monday and can also be started from the repository's **Actions** tab. Each run assigns a new seed or uses the seed supplied on a manual run, generates a complete fictional ERP scenario, cleans and models it, runs quality and reconciliation checks, publishes a new `web/data/dashboard.json`, and commits the refreshed dashboard data to `main`. That commit triggers the Pages deployment workflow.
+## Decisions and limitations
 
-Every refresh run retains a 14-day `northstar-pipeline-evidence` artifact with the generated dashboard contract, data-quality output, and reconciliation output. Use the Actions logs and [pipeline operations guide](documentation/operations/pipeline_operations.md) to inspect each step, input seed, control result, and deployment.
+- [Executing architecture and model](documentation/architecture/architecture.md)
+- [Decisions, limitations, recovery](documentation/engineering/decisions.md)
+- [Mock ERP integration contract](documentation/engineering/integration_contract.md)
+- [Security and scale plan](documentation/engineering/security_and_scale.md)
+- [Business investigation and methodology](case-study/case_study.md)
+- [Metric definitions](documentation/kpi_dictionary/kpi_dictionary.md)
+- [Operating guide](documentation/operations/pipeline_operations.md)
+- [Review completion and remaining external evidence](documentation/engineering/review_status.md)
 
-## Analytics and controls
+## Ownership
 
-Order bookings and posted invoice revenue are separate. Inventory is derived from movements. KPI definitions live in `documentation/kpi_dictionary/`; reconciliation and quality results are generated by the pipeline. See the architecture and case study for business questions, data grains and scenario design.
+Project owner: **Anumala Jithendra**. Developed iteratively with AI-assisted implementation. Repository changes and tests are the evidence; this does not claim unaided authorship or commercial production deployment. [LinkedIn](https://www.linkedin.com/in/anumala-jithendra/) · [Email](mailto:jithendra.anumala1@gmail.com).
 
-## License
-
-This project is released under the MIT License. See [LICENSE](LICENSE).
+MIT licensed. See LICENSE.

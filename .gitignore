@@ -10,3 +10,9 @@ data/generated/*.csv
 data/processed/*.csv
 !data/sample/**
 
+
+data/processed/*.sqlite
+data/processed/*.json
+.test-run/
+test-results/
+node_modules/

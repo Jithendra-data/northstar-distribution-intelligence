@@ -1,51 +1,45 @@
-# Architecture and Data Model
+# Executing architecture and reference data model
 
-## Pipeline
+## Implemented deployment
+
 ```mermaid
 flowchart TD
-  A[Synthetic ERP generators] --> B[Raw CSV source extracts]
-  B --> C[SQL staging and cleansing]
-  C --> D[Star schema dimensions and facts]
-  D --> E[Business marts and KPI queries]
-  E --> F[Python quality and reconciliation]
-  E --> G[Compact JSON export]
-  G --> H[Static HTML, CSS, JavaScript dashboard]
+  G[Synthetic generator] --> R[Immutable-for-run raw CSV]
+  R --> V[Blocking source checks]
+  V --> S[Normalized staging CSV]
+  S --> W[SQLite: six dimensions and four facts]
+  W --> M[SQL MonthlySales view]
+  S --> P[Python operational aggregates]
+  M --> C[Candidate dashboard contract]
+  P --> C
+  R --> Q[Independent source / SQLite / candidate reconciliation]
+  W --> Q
+  C --> Q
+  Q --> A{Mandatory controls pass?}
+  A -->|Yes| J[Atomic dashboard.json publication]
+  A -->|No| K[Retain last approved public dataset]
+  J --> B[GitHub Pages and browser]
 ```
 
-Raw preserves generated source columns and intentional data-quality exceptions. Staging standardizes dates/types, trims text, checks keys, and records rejected rows instead of silently losing them. The warehouse uses conformed dimensions and fact-specific grains. Marts apply governed business definitions. Validation checks relationships and totals. The dashboard reads precomputed JSON and works without a live database.
+`etl/run_pipeline.py` is the orchestrator. Cleaning trims text and standardizes dates; it does not implement a quarantine service. Invalid source checks stop the run before model loading. `etl/warehouse.py` loads `sql/sqlite/warehouse.sql`, enforces primary/foreign keys, and atomically replaces the reference database. Missing dimension members fail the load; there is no implicit unknown-member substitution.
 
-## Warehouse grains and relationships
-```mermaid
-erDiagram
-  DIM_DATE ||--o{ FACT_SALES : invoice_date
-  DIM_CUSTOMER ||--o{ FACT_SALES : customer
-  DIM_PRODUCT ||--o{ FACT_SALES : product
-  DIM_SALES_REP ||--o{ FACT_SALES : owner
-  DIM_WAREHOUSE ||--o{ FACT_SALES : fulfilled_at
-  DIM_DATE ||--o{ FACT_INVENTORY : transaction_date
-  DIM_PRODUCT ||--o{ FACT_INVENTORY : product
-  DIM_WAREHOUSE ||--o{ FACT_INVENTORY : location
-  DIM_DATE ||--o{ FACT_PURCHASING : created_date
-  DIM_VENDOR ||--o{ FACT_PURCHASING : supplier
-  DIM_PRODUCT ||--o{ FACT_PURCHASING : product
-  DIM_WAREHOUSE ||--o{ FACT_PURCHASING : destination
-  DIM_DATE ||--o{ FACT_RETURNS : return_date
-  DIM_CUSTOMER ||--o{ FACT_RETURNS : customer
-  DIM_PRODUCT ||--o{ FACT_RETURNS : product
-```
+Monthly financial aggregates execute against the SQLite view. Customer, inventory, vendor, and service calculations use validated staging CSVs. Reconciliation reads original raw sources and independently queries the SQLite facts. No transformation reads staging and then silently switches back to raw for its ordinary analytics path.
 
-| Fact | Grain | Additive measures |
+## Executed grains
+
+| Table | Grain | References |
 |---|---|---|
-| FactSales | One posted invoice line | quantity, revenue, COGS, gross profit, discount |
-| FactInventory | One inventory movement per product, warehouse, timestamp | signed quantity, extended movement cost |
-| FactPurchasing | One PO line | ordered, received, remaining quantity, committed value |
-| FactReturns | One return line | returned quantity, return amount |
+| FactSales | InvoiceID + LineNumber | Date, Customer, Product, Warehouse, SalesRep |
+| FactInventory | InventoryTransactionID | Date, Product, Warehouse |
+| FactPurchasing | PONumber + LineNumber | Date, Product, Vendor, Warehouse |
+| FactReturns | ReturnID | Date, Customer, Product |
 
-## Implementation plan
-1. Scaffold and define business requirements, entities, grains, KPI contracts, and synthetic scenario assumptions.
-2. Build modular master and transaction generators with reproducible configuration.
-3. Add raw/staging/warehouse SQL and transformations, marts, validation, and reconciliation.
-4. Export aggregated dashboard JSON and exception reports.
-5. Build the nine-page responsive static application and verify local/file-hosted behavior.
-6. Complete documentation, generated findings, and quality/visual review.
+The synthetic returns source has one row per ReturnID; no line number exists. The SQLite implementation uses natural keys and a full-rebuild Type 1 view of master data. Current customer region attribution is not historical territory attribution. DimDate currently covers 2020–2035; dates outside that reference range fail dimension resolution.
 
+## Separate SQL Server design
+
+`sql/01_database` through `sql/08_validation` describe a T-SQL deployment with surrogate-key dimensions. They are not the executing pipeline and do not constitute a tested SQL Server loader. Future work: idempotent loaders, constraints, late/unknown-member policy, effective-dated attributes, DECIMAL monetary storage, and measured query plans.
+
+## Boundaries
+
+The SQLite database is a build artifact, never exposed as a browser database API. Only synthetic JSON is public. No authentication, confidential-data authorization, CDC, or enterprise SLA is claimed. See engineering/security_and_scale.md for the private-deployment design.

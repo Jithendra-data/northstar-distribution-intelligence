@@ -27,5 +27,5 @@ Provide invoiced revenue separately from booked orders; gross profit and margin;
 - Produce inventory risk, overdue PO, and inactive customer reports.
 
 ## Non-functional requirements
-Portable relative paths; fixed seed; SQL Server compatible DDL; GitHub Pages compatible dashboard; responsive desktop-first design; traceable KPI definitions; explicit synthetic-data notice; no secrets; manageable browser payloads.
+Portable relative paths; seed and input hashes; executed SQLite reference plus SQL Server design; GitHub Pages compatible dashboard; responsive desktop-first design; traceable KPI definitions; explicit synthetic-data notice; no secrets; manageable browser payloads.
 

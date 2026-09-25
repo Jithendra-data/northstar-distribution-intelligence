@@ -4,24 +4,31 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 document.body.classList.add('reveal-ready');
 async function loadDashboard(){
   try{
-    const cacheKey=location.search||`?v=${Date.now()}`;
-    const response=await fetch(`data/dashboard.json${cacheKey}`); if(!response.ok) throw new Error('Dashboard export is not available yet.');
+    const cacheKey=location.search||'';
+    const response=await fetch(`data/dashboard.json${cacheKey}`,{signal:AbortSignal.timeout(15000)}); if(!response.ok) throw new Error('Dashboard export is not available yet.');
     const data=await response.json(),k=data.executive_kpis||{};
     const run=data.pipeline_metadata||{};
     const banner=document.querySelector('.notice');
-    if(banner&&run.refreshed_at_utc){const refreshed=new Date(run.refreshed_at_utc).toLocaleString();banner.textContent=`Synthetic scenario · seed ${run.random_seed} · refreshed ${refreshed}. Figures are fictional and intended for analytics demonstration.`}
-    document.querySelector('.hero-status small').textContent=run.random_seed?`Seed ${run.random_seed} · refreshed by GitHub Actions`:'Generate, check, reconcile, deploy';
+    banner.textContent=`Synthetic data · business data through ${run.data_through||'2025-12-31'} · scenario generated ${new Date(run.refreshed_at_utc).toLocaleString()}. No real company or customer records.`;
+    document.querySelector('.hero-status b').textContent=run.publication_status==='APPROVED'?'Published · controls approved':'Published dataset';
+    document.querySelector('.hero-status small').textContent=run.expected_exceptions?.length?'Acknowledged synthetic inventory exception':'See Data Quality for control results';
     document.querySelector('#customers-kpi').textContent=integer(k.customers); document.querySelector('#inventory-kpi').textContent=money(k.inventory_value); document.querySelector('#po-value').textContent=money(k.open_po_value);
     setupFilters(data,k);
-    renderFindings(data.business_findings||{});
-    renderQuality(data.data_quality||{});
+    arrangeKpis();
+
+    renderQualityResults(data.data_quality||{});
     renderTables(data);
     renderExecutiveSignals(data);
-    renderLineage(data);
-    setupProjectPage(data);
-    hydrateShell();
+    renderFindings(data.business_findings||{});
+    renderTrust(data);
+    renderDecisionEvidence(data);
     finishLoading();
-  }catch(error){document.querySelector('#revenue').textContent='Run export'; console.info(error.message); finishLoading()}
+  }catch(error){
+   document.querySelector('.hero-status b').textContent='Data unavailable';
+   document.querySelector('.hero-status small').textContent='Project documentation remains accessible';
+   document.querySelector('.hero-copy').insertAdjacentHTML('beforeend','<div role="alert" class="load-error"><b>Dashboard data is temporarily unavailable.</b><p>Retry loading or open Project &amp; Architecture.</p><button type="button" onclick="location.reload()">Retry loading</button></div>');
+   console.error(error);finishLoading();
+  }
 }
 function setupFilters(data,k){
   const rows=data.sales_trend_by_region||[],months=[...new Set(rows.map(r=>r.YearMonth))].sort(),region=document.querySelector('#region');
@@ -30,13 +37,18 @@ function setupFilters(data,k){
  const toolbar=document.createElement('div');toolbar.className='filter-toolbar';toolbar.setAttribute('aria-label','Financial performance filters');
  document.querySelector('.hero-copy').appendChild(toolbar);toolbar.append(dates,document.querySelector('.filter'));toolbar.insertAdjacentHTML('beforeend','<span class="filter-scope">Filters apply to financial KPIs and charts. Operational metrics and detail tables show the full dataset.</span>');
  for(const id of ['date-from','date-to']){const select=dates.querySelector(`#${id}`);select.innerHTML=months.map(m=>`<option value="${h(m)}">${h(m)}</option>`).join('')}
- if(months.length){dates.querySelector('#date-from').value=months[0];dates.querySelector('#date-to').value=months.at(-1)}
+ toolbar.insertAdjacentHTML('beforeend','<p id="filter-error" class="filter-error" role="alert"></p>');
+ if(months.length){dates.querySelector('#date-from').value=months[Math.max(0,months.length-12)];dates.querySelector('#date-to').value=months.at(-1)}
  function apply(){
-   const from=dates.querySelector('#date-from').value,to=dates.querySelector('#date-to').value,chosen=rows.filter(r=>r.YearMonth>=from&&r.YearMonth<=to&&(region.value==='all'||r.Region===region.value));
-   const grouped=new Map();for(const r of chosen){const x=grouped.get(r.YearMonth)||{YearMonth:r.YearMonth,Revenue:0,GrossProfit:0,Units:0,Invoices:0,Orders:0};for(const key of ['Revenue','GrossProfit','Units','Invoices','Orders'])x[key]+=Number(r[key]||0);grouped.set(r.YearMonth,x)}
-   const trend=[...grouped.values()].sort((a,b)=>a.YearMonth.localeCompare(b.YearMonth)),rev=trend.reduce((s,x)=>s+x.Revenue,0),gp=trend.reduce((s,x)=>s+x.GrossProfit,0),orderCount=trend.reduce((s,x)=>s+x.Orders,0);
-   const toYear=Number(to.slice(0,4)),fromMonth=Number(from.slice(5,7)),toMonth=Number(to.slice(5,7)),samePeriod=rows.filter(r=>Number(r.YearMonth.slice(0,4))===toYear&&Number(r.YearMonth.slice(5,7))>=fromMonth&&Number(r.YearMonth.slice(5,7))<=toMonth&&(region.value==='all'||r.Region===region.value)).reduce((s,r)=>s+Number(r.Revenue||0),0),priorPeriod=rows.filter(r=>Number(r.YearMonth.slice(0,4))===toYear-1&&Number(r.YearMonth.slice(5,7))>=fromMonth&&Number(r.YearMonth.slice(5,7))<=toMonth&&(region.value==='all'||r.Region===region.value)).reduce((s,r)=>s+Number(r.Revenue||0),0),yoy=priorPeriod?(samePeriod-priorPeriod)/priorPeriod:null;
-   document.querySelector('#revenue').textContent=money(rev);document.querySelector('#profit').textContent=money(gp);document.querySelector('#margin').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#gm-kpi').textContent=`${(rev?gp/rev*100:0).toFixed(1)}%`;document.querySelector('#yoy').textContent=yoy==null?'—':`${yoy>=0?'+':''}${(yoy*100).toFixed(1)}%`;document.querySelector('#orders').textContent=integer(orderCount);document.querySelector('.period').textContent=`${from} — ${to}`;drawCharts(trend);renderMetricContext(trend,from,to,region.value);polishKpis(data,trend,from,to,region.value);
+  const from=dates.querySelector('#date-from').value,to=dates.querySelector('#date-to').value;
+  if(from>to){document.querySelector('#filter-error').textContent='From must be on or before Through. Displaying the last valid selection.';dates.querySelector('#date-from').setAttribute('aria-invalid','true');return}
+  document.querySelector('#filter-error').textContent='';dates.querySelector('#date-from').removeAttribute('aria-invalid');
+  const period=reportingPeriod(rows,from,to,region.value),{current,margin,trend}=period;
+  document.querySelector('#revenue').textContent=trend.length?money(current.Revenue):'—';document.querySelector('#profit').textContent=trend.length?money(current.GrossProfit):'—';document.querySelector('#orders').textContent=trend.length?integer(current.Orders):'—';
+  document.querySelector('#margin').textContent=document.querySelector('#gm-kpi').textContent=margin===null?'—':`${margin.toFixed(1)}%`;
+  document.querySelector('#yoy').textContent=period.changes.Revenue===null?'—':`${period.changes.Revenue>=0?'+':''}${period.changes.Revenue.toFixed(1)}%`;
+  document.querySelector('.period').textContent=`${from} — ${to}`;drawCharts(trend);renderMetricContext(trend,from,to,region.value);polishKpis(data,trend,from,to,region.value);renderPeriodBadges(period);
+  document.dispatchEvent(new CustomEvent('northstar:filters',{detail:{from,to,region:region.value}}));
  }
  dates.addEventListener('change',apply);region.addEventListener('change',apply);apply();
 }
@@ -67,17 +79,20 @@ function renderFindings(f){
   ['PRODUCT QUALITY',`${((f.health_2025_return_amount_rate||0)*100).toFixed(1)}% returns`,`Health return amount as a share of 2025 revenue`]
  ];
  el.innerHTML=`<div class="finding-heading"><span>FULL DATASET · INVESTIGATION SIGNALS</span><b>Business observations</b></div><div class="finding-cards">${cards.map((c,i)=>`<article><small>${c[0]}</small><strong>${c[1]}</strong><p>${c[2]}</p><a class="insight-link" href="#${['purchasing','operations','inventory','customers','sales','operations'][i]}">Investigate signal <span aria-hidden="true">→</span></a></article>`).join('')}</div>`;
- document.querySelector('.chart-grid').insertAdjacentElement('afterend',el);
+ const details=document.createElement('details');details.className='signal-method';details.innerHTML='<summary>Additional calculated observations</summary>';details.appendChild(el);document.querySelector('.executive-signals').appendChild(details);
 }
 function renderQuality(q){
+ const section=document.querySelector('#quality');
+ section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Executed path: validated sources → normalized staging → SQLite facts and SQL monthly sales. Python operational aggregates also read staging directly. Independent reconciliation approves the candidate before publication. SQL Server is a separate deployment design.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/requirements/business_requirements.md" target="_blank" rel="noreferrer">Business requirements ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/architecture/architecture.md" target="_blank" rel="noreferrer">Architecture &amp; ER model ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/data_dictionary/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/kpi_dictionary/kpi_dictionary.md" target="_blank" rel="noreferrer">KPI definitions ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/testing/validation_strategy.md" target="_blank" rel="noreferrer">Control strategy ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Case study ↗</a></div></section>`);
+}
+function renderQualityResults(q){
  const section=document.querySelector('#quality'),s=q.summary||{}; if(!section)return;
  const passed=Number(s.passed_tests||0),failed=Number(s.failed_tests||0),tests=q.results||[];
  section.querySelector('p').textContent=`${integer(s.total_tests||0)} automated controls reviewed for this synthetic run. ${integer(s.failed_records||0)} ending inventory position(s) are flagged for scenario investigation.`;
  const table=document.createElement('div');table.className='quality-list';
- table.innerHTML=tests.map(t=>`<div class="quality-row"><span>${t.TestName}</span><b class="${t.Status==='PASS'?'pass':'fail'}">${t.Status==='PASS'?'OK':'REVIEW'}</b><small>${integer(t.FailedRecords)} flagged / ${integer(t.RecordsChecked)} checked</small></div>`).join('');
+ table.innerHTML=tests.map(t=>`<div class="quality-row"><span>${h(t.TestName)}</span><b class="${t.Status==='PASS'?'pass':'fail'}">${t.Status==='PASS'?'OK':'REVIEW'}</b><small>${Number(t.FailedRecords).toLocaleString()} flagged / ${Number(t.RecordsChecked).toLocaleString()} checked · ${h(t.Severity||'CONTROL')}</small></div>`).join('');
  section.appendChild(table);
 
- section.insertAdjacentHTML('afterend',`<section class="placeholder-section" id="architecture"><span>07 / SYSTEM DESIGN</span><h2>From synthetic ERP to business decisions</h2><div class="flowline"><b>Synthetic ERP</b><i>→</i><b>Raw CSV</b><i>→</i><b>Staging</b><i>→</i><b>Star schema</b><i>→</i><b>Analytics marts</b><i>→</i><b>Static JSON</b><i>→</i><b>Dashboard</b></div><p>Raw preserves source records. Staging standardizes and checks them. The warehouse models conformed dimensions and transaction-grain facts. Marts define business measures, quality controls check relationships and totals, and the static dashboard reads only precomputed files.</p></section><section class="placeholder-section" id="documentation"><span>08 / PROJECT DOCUMENTATION</span><h2>Methods, definitions, and operating notes</h2><div class="doc-links"><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/requirements/business_requirements.md" target="_blank" rel="noreferrer">Business requirements ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/architecture/architecture.md" target="_blank" rel="noreferrer">Architecture &amp; ER model ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/data_dictionary/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/documentation/kpi_dictionary/kpi_dictionary.md" target="_blank" rel="noreferrer">KPI definitions ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/testing/validation_strategy.md" target="_blank" rel="noreferrer">Control strategy ↗</a><a href="https://github.com/Jithendra-data/northstar-distribution-intelligence/blob/main/case-study/case_study.md" target="_blank" rel="noreferrer">Case study ↗</a></div></section>`);
 }
 const h=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function drawFallbackLineChart(dom, labels, series, options={}){
@@ -123,7 +138,7 @@ function hydrateShell(){
  const nav=document.querySelector('.sidebar nav');nav.appendChild(nav.querySelector('[href="#project-story"]'));
  nav.querySelector('[href="#sales"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ANALYTICS</div>');
  nav.querySelector('[href="#quality"]').insertAdjacentHTML('beforebegin','<div class="nav-group">ENGINEERING</div>');
- setActive(['#architecture','#documentation'].includes(location.hash)?'project-story':location.hash.slice(1)||'overview');
+ setActive(['#architecture','#documentation','#implementation','#run-evidence','#contribution','#value-model'].includes(location.hash)?'project-story':location.hash.slice(1)||'overview');
  links.forEach(a=>a.addEventListener('click',()=>setActive(a.getAttribute('href').slice(1))));
  let queued=false;
  const updateNavigation=()=>{queued=false;const current=sections.filter(section=>section.getClientRects().length&&section.getBoundingClientRect().top<=130).sort((a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().top)[0];setActive(current?.id||'overview')};
@@ -162,5 +177,9 @@ function drawCharts(rows){
  margin.setOption({animation:!prefersReducedMotion,animationDuration:300,aria:{enabled:true},tooltip:{...base.tooltip,valueFormatter:value=>`${Number(value).toFixed(2)}%`},grid:{left:12,right:16,top:18,bottom:35,containLabel:true},xAxis:{type:'category',data:months,axisLabel:{color:'#596b7a',fontSize:11},axisLine:{lineStyle:{color:'#e7edef'}},axisTick:{show:false}},yAxis:{type:'value',axisLabel:{color:'#596b7a',fontSize:11,formatter:'{value}%'},splitLine:{lineStyle:{color:'#eef2f3',type:'dashed'}}},series:[{name:'Gross margin',type:'line',smooth:true,data:margins,symbol:'none',lineStyle:{width:2.5,color:'#d5a844'},areaStyle:{color:'rgba(213,168,68,.12)'}}]},true);
  if(!window.__northstarResizeBound){window.addEventListener('resize',()=>{echarts.getInstanceByDom(document.querySelector('#trend'))?.resize();echarts.getInstanceByDom(document.querySelector('#margin-chart'))?.resize()});window.__northstarResizeBound=true}
 }
+renderQuality({});
+renderLineage({});
+setupProjectPage();
+hydrateShell();
 loadDashboard();
 

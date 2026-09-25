@@ -7,12 +7,16 @@ import pandas as pd
 from utils.config import RAW_DIR, PROCESSED_DIR
 from utils.helpers import write_csv
 
-def build(input_dir: Path=RAW_DIR, output_dir: Path=PROCESSED_DIR) -> dict[str,pd.DataFrame]:
+def build(input_dir: Path=PROCESSED_DIR, output_dir: Path=PROCESSED_DIR, warehouse: Path|None=None) -> dict[str,pd.DataFrame]:
     invoices=pd.read_csv(input_dir/"InvoiceLine.csv")
     ih=pd.read_csv(input_dir/"InvoiceHeader.csv",parse_dates=["InvoiceDate"])
     sales=invoices.merge(ih[["InvoiceID","InvoiceDate","CustomerID"]],on="InvoiceID",how="inner")
     sales["YearMonth"]=sales.InvoiceDate.dt.to_period("M").astype(str)
     monthly=sales.groupby("YearMonth",as_index=False).agg(Revenue=("Revenue","sum"),GrossProfit=("GrossProfit","sum"),Units=("Quantity","sum"),Invoices=("InvoiceID","nunique"))
+    if warehouse is not None:
+        import sqlite3
+        with sqlite3.connect(warehouse) as db: monthly=pd.read_sql_query("SELECT * FROM MonthlySales ORDER BY YearMonth",db)
+        db.close()
     monthly["GrossMarginPct"]=monthly.GrossProfit.div(monthly.Revenue.where(monthly.Revenue.ne(0)))
     dimc=pd.read_csv(input_dir/"Customer.csv")
     customer=sales.groupby("CustomerID",as_index=False).agg(LifetimeRevenue=("Revenue","sum"),GrossProfit=("GrossProfit","sum"),LastPurchaseDate=("InvoiceDate","max"),Orders=("InvoiceID","nunique"))

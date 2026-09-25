@@ -1,24 +1,16 @@
-# Pipeline Operations Guide
+# Operating guide
 
-## What starts a refresh
+Scheduled refresh runs Mondays at 10:00 UTC, or manually with a numeric seed and record counts. Both refresh and Pages deployment depend on reusable regression checks. GitHub scheduling remains best effort.
 
-The `Refresh synthetic analytics data` workflow runs every Monday at 10:00 UTC. From the repository's **Actions** tab, choose the workflow and select **Run workflow** for an on-demand refresh. You can provide a seed to reproduce a scenario or leave it blank to use the GitHub workflow run ID as a new seed.
+1. Install exact Python and browser-test dependencies.
+2. Generate synthetic masters and transactions, or reuse raw files with `--skip-generation`.
+3. Fail on unexpected source controls. Document the synthetic negative-stock exception.
+4. Normalize staging CSVs; load enforced SQLite dimensions and facts; calculate SQL/Python aggregates once.
+5. Build a candidate contract and independently reconcile raw, SQLite, and candidate totals.
+6. Fail closed on missing, nonfinite, or unreconciled measures. Atomically replace public JSON only after approval.
+7. Retain the database, control output, reconciliation, and run manifest as a 14-day Actions artifact.
+8. Commit the approved JSON and deploy directly from the refresh workflow. Ordinary code pushes deploy through Pages after reusable checks.
 
-## What happens in a run
+`data_through` is the business cutoff; `refreshed_at_utc` is generation time. A reused raw run has an unknown seed but exact input hashes. The manifest records dependencies, interpreter, commit/run identity, fact counts, runtime, model/export Python allocation peak, and payload hash/bytes. The web page does not claim that a recent generation timestamp makes the historical business dates current.
 
-1. GitHub checks out the `main` branch and installs the pinned Python dependencies.
-2. The generator writes fictional ERP extracts for master data, orders, invoices, purchase orders, receipts, inventory movements, and returns.
-3. The ETL pipeline cleans the extracts and calculates sales, margin, customer, inventory, vendor, warehouse, and returns analytics.
-4. Quality checks test uniqueness, relationships, dates, quantities, product costs, and ending inventory balances.
-5. Reconciliation compares source calculations, analytic outputs, and the dashboard contract for revenue, gross profit, units, inventory value, and open PO value.
-6. The exporter writes `web/data/dashboard.json`, including the scenario seed and refresh timestamp.
-7. GitHub Actions saves the dashboard contract and control results as a 14-day artifact, then commits the refreshed dashboard JSON to `main`.
-8. The Pages deployment workflow publishes the new dashboard version.
-
-## How to inspect a run
-
-Open the repository's **Actions** tab and select a refresh run. The logs show each stage and print the quality and reconciliation tables. The `northstar-pipeline-evidence` artifact contains the exact dashboard JSON, quality results, and reconciliation results produced by that run. The dashboard notice displays the seed and UTC refresh timestamp of its current scenario.
-
-## Important operating notes
-
-The project intentionally generates fictional data. A non-passing negative ending-inventory test is a designed scenario signal, surfaced in the dashboard as inventory risk; other quality and reconciliation controls should pass. Scheduled GitHub workflows are best effort and can be delayed by GitHub's scheduler. Manual runs provide an immediate refresh path.
+Recovery: consult engineering/decisions.md. Raw and processed build files are local artifacts; only synthetic `web/` content is public. Expected exceptions must not be silently broadened to make a failed pipeline green.
