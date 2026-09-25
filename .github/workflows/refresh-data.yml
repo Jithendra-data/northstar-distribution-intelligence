@@ -1,0 +1,65 @@
+name: Refresh synthetic analytics data
+
+on:
+  workflow_dispatch:
+    inputs:
+      random_seed:
+        description: Optional numeric seed. Leave blank to create a new scenario from this workflow run.
+        required: false
+        type: string
+      orders:
+        description: Number of synthetic sales orders.
+        required: false
+        default: "75000"
+        type: string
+      purchase_orders:
+        description: Number of synthetic purchase orders.
+        required: false
+        default: "10000"
+        type: string
+  schedule:
+    - cron: "0 10 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: northstar-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      NORTHSTAR_RANDOM_SEED: ${{ inputs.random_seed || github.run_id }}
+      ORDER_COUNT: ${{ inputs.orders || '75000' }}
+      PURCHASE_ORDER_COUNT: ${{ inputs.purchase_orders || '10000' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install pipeline dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Generate, model, validate, reconcile, and export
+        run: python -m etl.run_pipeline --orders "$ORDER_COUNT" --purchase-orders "$PURCHASE_ORDER_COUNT"
+      - name: Summarize controls
+        run: |
+          python -c "import pandas as pd; print(pd.read_csv('data/processed/data_quality.csv').to_string(index=False)); print(); print(pd.read_csv('data/processed/reconciliation.csv').to_string(index=False))"
+      - name: Preserve run evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: northstar-pipeline-evidence-${{ github.run_id }}
+          path: |
+            web/data/dashboard.json
+            data/processed/data_quality.csv
+            data/processed/reconciliation.csv
+          retention-days: 14
+      - name: Commit refreshed dashboard data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/dashboard.json
+          git diff --cached --quiet || git commit -m "Refresh synthetic analytics scenario ($NORTHSTAR_RANDOM_SEED)"
+          git push

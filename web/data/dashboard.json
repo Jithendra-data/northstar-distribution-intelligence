@@ -1,4 +1,9 @@
 {
+  "pipeline_metadata": {
+    "dataset_type": "synthetic",
+    "random_seed": 73041,
+    "refreshed_at_utc": "2026-09-25T01:18:26.885097+00:00"
+  },
   "executive_kpis": {
     "revenue": 30082220.45,
     "gross_profit": 11185693.030000001,

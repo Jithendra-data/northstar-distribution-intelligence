@@ -1,10 +1,12 @@
 """Export small static JSON contracts consumed by the GitHub Pages dashboard."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import pandas as pd
 
 from etl.build_analytics import build
-from utils.config import RAW_DIR, WEB_DATA_DIR, PROCESSED_DIR
+from utils.config import RAW_DIR, WEB_DATA_DIR, PROCESSED_DIR, RANDOM_SEED
 from utils.helpers import write_json
 
 def export() -> None:
@@ -86,6 +88,7 @@ def export() -> None:
         safe_snapshot=inv_top.astype(object).where(pd.notna(inv_top),None)
     else: safe_snapshot=snapshot
     payload={
+      "pipeline_metadata":{"dataset_type":"synthetic","random_seed":RANDOM_SEED,"refreshed_at_utc":datetime.now(timezone.utc).isoformat()},
       "executive_kpis":{"revenue":float(monthly.Revenue.sum()),"gross_profit":float(monthly.GrossProfit.sum()),"gross_margin":float(monthly.GrossProfit.sum()/monthly.Revenue.sum()) if monthly.Revenue.sum() else 0,"units":int(monthly.Units.sum()),"orders":int(orders.SalesOrderID.nunique()),"customers":int(customers.CustomerID.nunique()),"inventory_value":float((snapshot.AvailableQty*snapshot.UnitCost).sum()) if not snapshot.empty else 0,"open_po_value":open_po_value},
       "sales_trend":monthly.to_dict(orient="records"),"sales_trend_by_region":region_trend.to_dict(orient="records"),"sales_by_category":category_summary.sort_values("Revenue",ascending=False).to_dict(orient="records"),"sales_by_region":region_summary.sort_values("Revenue",ascending=False).to_dict(orient="records"),"sales_by_rep":rep_summary.sort_values("Revenue",ascending=False).to_dict(orient="records"),"sales_by_channel":channel_summary.to_dict(orient="records"),"sales_detail":sales_product.nlargest(1500,"Revenue")[["InvoiceID","InvoiceDate","CustomerID","Region","SalesRepID","ProductID","SKU","ProductName","CategoryName","Channel","Quantity","Revenue","DiscountAmount","GrossProfit"]].to_dict(orient="records"),"customer_performance":customers.nlargest(500,"LifetimeRevenue").to_dict(orient="records"),"customer_segments":customer_segments.to_dict(orient="records"),"inventory_detail":safe_snapshot.to_dict(orient="records"),"vendor_performance":vendors.to_dict(orient="records"),"open_purchase_orders":open_po_detail.to_dict(orient="records"),"warehouse_performance":warehouse_summary.to_dict(orient="records"),"returns_by_reason":returns_by_reason.to_dict(orient="records"),"business_findings":findings,"data_quality":{"summary":dq_summary,"results":dq.to_dict(orient="records")},"reconciliation":reconciliation}
     WEB_DATA_DIR.mkdir(parents=True,exist_ok=True); write_json(payload,WEB_DATA_DIR/"dashboard.json")

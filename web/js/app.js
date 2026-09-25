@@ -4,6 +4,9 @@ async function loadDashboard(){
   try{
     const response=await fetch('data/dashboard.json'); if(!response.ok) throw new Error('Dashboard export is not available yet.');
     const data=await response.json(),k=data.executive_kpis||{};
+    const run=data.pipeline_metadata||{};
+    const banner=document.querySelector('.notice');
+    if(banner&&run.refreshed_at_utc){const refreshed=new Date(run.refreshed_at_utc).toLocaleString();banner.textContent=`Synthetic scenario · seed ${run.random_seed} · refreshed ${refreshed}. Figures are fictional and intended for analytics demonstration.`}
     document.querySelector('#customers-kpi').textContent=integer(k.customers); document.querySelector('#inventory-kpi').textContent=money(k.inventory_value); document.querySelector('#po-value').textContent=money(k.open_po_value);
     setupFilters(data,k);
     renderFindings(data.business_findings||{});

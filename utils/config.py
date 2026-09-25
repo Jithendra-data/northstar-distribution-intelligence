@@ -1,4 +1,5 @@
 """Central project configuration. Paths are resolved from the repository root."""
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,5 +14,6 @@ NUM_SALES_ORDERS = 75_000
 NUM_PURCHASE_ORDERS = 10_000
 START_DATE = "2023-01-01"
 END_DATE = "2025-12-31"
-RANDOM_SEED = 73_041
-
+# Set NORTHSTAR_RANDOM_SEED for a new, traceable synthetic scenario. Keeping a
+# default preserves reproducibility for local development.
+RANDOM_SEED = int(os.getenv("NORTHSTAR_RANDOM_SEED", "73041"))
